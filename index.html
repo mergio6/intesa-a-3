@@ -641,6 +641,20 @@
   .settings-row-head { display: flex; align-items: center; justify-content: space-between; }
   .settings-value { font-size: 13px; font-weight: 800; color: var(--blue-dark); }
   .settings-range { width: 100%; accent-color: var(--blue); cursor: pointer; }
+  .settings-sync-btn {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: var(--blue-dark);
+    cursor: pointer;
+  }
+  .settings-sync-status { font-size: 12px; color: var(--text-dim); }
+  .settings-sync-status.ok { color: var(--green-dark); }
+  .settings-sync-status.err { color: var(--red-dark); }
   .settings-theme-group {
     display: flex;
     gap: 4px;
@@ -1187,6 +1201,13 @@
       </div>
       <input type="range" class="settings-range" id="settings-textsize" min="85" max="135" step="5" value="100">
     </div>
+    <div class="settings-row settings-row-col">
+      <div class="settings-row-head">
+        <div class="settings-row-label"><span class="settings-icon">📶</span><span>Parole online</span></div>
+        <button type="button" class="settings-sync-btn" id="btn-sync-now">Sincronizza ora</button>
+      </div>
+      <span class="settings-sync-status" id="settings-sync-status">—</span>
+    </div>
   </div>
 </div>
 
@@ -1690,61 +1711,102 @@
   // Ad ogni apertura del gioco, se c'è connessione, le tre liste vengono
   // sostituite integralmente con quelle del foglio pubblicato: il foglio
   // Google è la fonte "ufficiale" e aggiornata delle parole.
-  var SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQl5gVHMexky_ieAYAd2tq9kGYu6Flkc0MU06NmIJQlzRNIJ4vyUQLNP1MJFg1ysk29ZRual31JO3AV/pub?gid=1155418382&single=true&output=csv';
+  //
+  // Nota tecnica: il CSV pubblicato di Google Sheets non può essere letto con
+  // fetch() dai siti web (Google non invia le intestazioni CORS necessarie),
+  // quindi usiamo l'endpoint "gviz" con la tecnica JSONP (uno <script> che
+  // Google stesso riempie con i dati), che non è soggetta a questo blocco.
+  var SHEET_PUBLISHED_ID = '2PACX-1vQl5gVHMexky_ieAYAd2tq9kGYu6Flkc0MU06NmIJQlzRNIJ4vyUQLNP1MJFg1ysk29ZRual31JO3AV';
+  var SHEET_GID = '1155418382';
 
-  function parseCSV(text) {
-    var rows = [];
-    var row = [];
-    var field = '';
-    var inQuotes = false;
-    for (var i = 0; i < text.length; i++) {
-      var c = text[i];
-      if (inQuotes) {
-        if (c === '"') {
-          if (text[i + 1] === '"') { field += '"'; i++; }
-          else { inQuotes = false; }
-        } else {
-          field += c;
-        }
-      } else if (c === '"') {
-        inQuotes = true;
-      } else if (c === ',') {
-        row.push(field); field = '';
-      } else if (c === '\r') {
-        // ignorato, gestito su \n
-      } else if (c === '\n') {
-        row.push(field); field = ''; rows.push(row); row = [];
-      } else {
-        field += c;
-      }
+  var sheetSyncStatus = { state: 'idle', lastSuccess: null }; // idle | syncing | success | error
+
+  function updateSyncStatusUI() {
+    var el = document.getElementById('settings-sync-status');
+    if (!el) return;
+    el.classList.remove('ok', 'err');
+    if (sheetSyncStatus.state === 'syncing') {
+      el.textContent = 'Sincronizzazione in corso…';
+    } else if (sheetSyncStatus.state === 'success') {
+      var t = sheetSyncStatus.lastSuccess;
+      var hh = t ? ('0' + t.getHours()).slice(-2) : '--';
+      var mm = t ? ('0' + t.getMinutes()).slice(-2) : '--';
+      el.textContent = 'Aggiornate alle ' + hh + ':' + mm + ' (' + facileBank.list.length + ' facili, ' + difficileBank.list.length + ' difficili, ' + doubleBank.list.length + ' raddoppi)';
+      el.classList.add('ok');
+    } else if (sheetSyncStatus.state === 'error') {
+      el.textContent = 'Sincronizzazione non riuscita, uso le parole salvate sul dispositivo';
+      el.classList.add('err');
+    } else {
+      el.textContent = '—';
     }
-    if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
-    return rows;
+  }
+
+  function applySheetRows(rows) {
+    var facili = rows.map(function (r) { return r[0]; });
+    var difficili = rows.map(function (r) { return r[1]; });
+    var raddoppi = rows.map(function (r) { return r[2]; });
+    facileBank.replace(facili);
+    difficileBank.replace(difficili);
+    doubleBank.replace(raddoppi);
+    if (typeof renderList === 'function') {
+      renderList('facile'); renderList('difficile'); renderList('double');
+    }
   }
 
   function syncWordsFromSheet() {
-    if (!SHEET_CSV_URL) return;
-    fetch(SHEET_CSV_URL, { cache: 'no-store' })
-      .then(function (res) { if (!res.ok) throw new Error('risposta non valida'); return res.text(); })
-      .then(function (text) {
-        var rows = parseCSV(text);
-        if (rows.length <= 1) return; // solo intestazione o foglio vuoto: non sovrascrivere
-        rows = rows.slice(1); // salta l'intestazione
-        var facili = rows.map(function (r) { return r[0]; });
-        var difficili = rows.map(function (r) { return r[1]; });
-        var raddoppi = rows.map(function (r) { return r[2]; });
-        facileBank.replace(facili);
-        difficileBank.replace(difficili);
-        doubleBank.replace(raddoppi);
-        // Se la sezione Parole è già visibile, aggiorna anche gli elenchi mostrati.
-        if (typeof renderList === 'function') {
-          renderList('facile'); renderList('difficile'); renderList('double');
-        }
-      })
-      .catch(function () {
-        // Nessuna connessione o foglio non raggiungibile: si continua con
-        // le parole già salvate sul dispositivo, senza interrompere il gioco.
-      });
+    if (!SHEET_PUBLISHED_ID) return;
+    sheetSyncStatus.state = 'syncing';
+    updateSyncStatusUI();
+
+    var callbackName = 'intesaA3SheetCallback_' + Date.now();
+    var finished = false;
+
+    function cleanup() {
+      try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+      var s = document.getElementById(callbackName);
+      if (s && s.parentNode) s.parentNode.removeChild(s);
+    }
+
+    var timeoutId = setTimeout(function () {
+      if (finished) return;
+      finished = true;
+      sheetSyncStatus.state = 'error';
+      updateSyncStatusUI();
+      cleanup();
+    }, 10000);
+
+    window[callbackName] = function (data) {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeoutId);
+      try {
+        var rows = data.table.rows.map(function (row) {
+          return row.c.map(function (cell) {
+            return (cell && cell.v !== null && cell.v !== undefined) ? String(cell.v) : '';
+          });
+        });
+        applySheetRows(rows);
+        sheetSyncStatus.state = 'success';
+        sheetSyncStatus.lastSuccess = new Date();
+      } catch (e) {
+        sheetSyncStatus.state = 'error';
+      }
+      updateSyncStatusUI();
+      cleanup();
+    };
+
+    var script = document.createElement('script');
+    script.id = callbackName;
+    script.src = 'https://docs.google.com/spreadsheets/d/e/' + SHEET_PUBLISHED_ID + '/gviz/tq?gid=' + SHEET_GID + '&headers=1&tqx=out:json;responseHandler=' + callbackName;
+    script.onerror = function () {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeoutId);
+      sheetSyncStatus.state = 'error';
+      updateSyncStatusUI();
+      cleanup();
+    };
+    document.head.appendChild(script);
   }
   syncWordsFromSheet();
 
@@ -2935,11 +2997,16 @@
     vibrationToggleEl.checked = appSettings.vibration;
     syncTextSizeUI();
     syncThemeUI();
+    updateSyncStatusUI();
     settingsOverlayEl.style.display = 'flex';
     playClickSound();
   });
   document.getElementById('btn-settings-close').addEventListener('click', function () {
     settingsOverlayEl.style.display = 'none';
+  });
+  document.getElementById('btn-sync-now').addEventListener('click', function () {
+    playClickSound();
+    syncWordsFromSheet();
   });
   audioToggleEl.addEventListener('change', function () {
     appSettings.audio = audioToggleEl.checked;
