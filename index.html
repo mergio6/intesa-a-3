@@ -1731,7 +1731,9 @@
   // CORS necessarie). Instradiamo quindi la stessa identica richiesta
   // attraverso un piccolo servizio di relay gratuito che aggiunge il permesso
   // mancante; se il primo non risponde, si tenta automaticamente un secondo.
+  var SHEET_REAL_ID = '1dEEdxiR4mn_JNVQZbmyEBs1j3NJ3LQt6';
   var SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQl5gVHMexky_ieAYAd2tq9kGYu6Flkc0MU06NmIJQlzRNIJ4vyUQLNP1MJFg1ysk29ZRual31JO3AV/pub?gid=1155418382&single=true&output=csv';
+  var SHEET_GID = '1155418382';
   var SYNC_PROXIES = [
     function (url) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url); },
     function (url) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url); },
@@ -1811,23 +1813,92 @@
       .catch(function () { return tryFetchWithProxies(index + 1); });
   }
 
+  function csvTextToRows(text) {
+    var rows = parseCSV(text);
+    if (rows.length <= 1) throw new Error('foglio vuoto');
+    return rows.slice(1); // salta l'intestazione
+  }
+
+  // Metodo diretto: endpoint "gviz" di Google con tecnica JSONP (un tag
+  // <script> che Google stesso riempie con i dati). Funziona per i fogli
+  // pubblicati o condivisi "chiunque abbia il link", senza passare da
+  // servizi esterni di terze parti.
+  function tryGvizDirect() {
+    return new Promise(function (resolve, reject) {
+      var callbackName = 'intesaA3Gviz_' + Date.now();
+      var finished = false;
+
+      function cleanup() {
+        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+        var s = document.getElementById(callbackName);
+        if (s && s.parentNode) s.parentNode.removeChild(s);
+      }
+
+      var timeoutId = setTimeout(function () {
+        if (finished) return;
+        finished = true;
+        cleanup();
+        reject(new Error('timeout gviz'));
+      }, 8000);
+
+      window[callbackName] = function (data) {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        try {
+          if (!data || !data.table || !data.table.rows) throw new Error('risposta gviz inattesa');
+          var rows = data.table.rows.map(function (row) {
+            return row.c.map(function (cell) {
+              return (cell && cell.v !== null && cell.v !== undefined) ? String(cell.v) : '';
+            });
+          });
+          cleanup();
+          resolve(rows);
+        } catch (e) {
+          cleanup();
+          reject(e);
+        }
+      };
+
+      var script = document.createElement('script');
+      script.id = callbackName;
+      script.src = 'https://docs.google.com/spreadsheets/d/' + SHEET_REAL_ID + '/gviz/tq?gid=' + SHEET_GID + '&headers=1&tqx=out:json;responseHandler=' + callbackName;
+      script.onerror = function () {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        cleanup();
+        reject(new Error('errore caricamento script gviz'));
+      };
+      document.head.appendChild(script);
+    });
+  }
+
   function syncWordsFromSheet() {
-    if (!SHEET_CSV_URL) return;
     sheetSyncStatus.state = 'syncing';
     updateSyncStatusUI();
-    tryFetchWithProxies(0)
-      .then(function (text) {
-        var rows = parseCSV(text);
-        if (rows.length <= 1) throw new Error('foglio vuoto');
-        rows = rows.slice(1); // salta l'intestazione
+    tryGvizDirect()
+      .then(function (rows) {
+        if (!rows.length) throw new Error('foglio vuoto');
         applySheetRows(rows);
         sheetSyncStatus.state = 'success';
         sheetSyncStatus.lastSuccess = new Date();
         updateSyncStatusUI();
       })
       .catch(function () {
-        sheetSyncStatus.state = 'error';
-        updateSyncStatusUI();
+        // Il metodo diretto non ha funzionato: proviamo con i servizi di riserva.
+        tryFetchWithProxies(0)
+          .then(function (text) {
+            var rows = csvTextToRows(text);
+            applySheetRows(rows);
+            sheetSyncStatus.state = 'success';
+            sheetSyncStatus.lastSuccess = new Date();
+            updateSyncStatusUI();
+          })
+          .catch(function () {
+            sheetSyncStatus.state = 'error';
+            updateSyncStatusUI();
+          });
       });
   }
   syncWordsFromSheet();
