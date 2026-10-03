@@ -3365,106 +3365,37 @@
   function setupSplashWords() {
     var container = document.getElementById('splash-words');
     if (!container) return;
-    var pool = (facileBank.list.length ? facileBank.list : DEFAULT_SINGLE_WORDS).slice();
-    if (!pool.length) return;
-    for (var i = pool.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
-    }
-    var W = container.clientWidth || window.innerWidth;
-    var H = container.clientHeight || window.innerHeight;
-    if (!W || !H) return;
-
-    var MARGIN = 10; // spazio minimo di rispetto attorno a ogni parola
-    var TRIES_PER_WORD = 70;
-    var WORD_COUNT = 18;
-
-    function rectsOverlap(a, b) {
-      return !(a.x2 < b.x1 || a.x1 > b.x2 || a.y2 < b.y1 || a.y1 > b.y2);
-    }
-
-    // zona centrale (logo + titolo + barra) da non toccare in nessun modo:
-    // già inserita come primo "ingombro", così le parole la evitano con lo
-    // stesso identico controllo usato tra loro
-    var EXCLUDE = { x1: W * 0.20, x2: W * 0.80, y1: H * 0.33, y2: H * 0.67 };
-    var placed = [EXCLUDE];
-
-    // Prova a piazzare una parola dentro un intervallo orizzontale [xMin,xMax],
-    // riducendo il font se non trova posto, fino a un minimo leggibile.
-    function tryPlaceInRange(word, xMin, xMax) {
-      var sizes = [20, 17, 14, 12];
-      for (var s = 0; s < sizes.length; s++) {
-        var fontSize = sizes[s];
-        var span = document.createElement('span');
-        span.className = 'splash-word';
-        span.textContent = word;
-        span.style.fontSize = fontSize + 'px';
-        span.style.visibility = 'hidden';
-        container.appendChild(span);
-        var w = span.offsetWidth;
-        var h = span.offsetHeight;
-        var maxX = xMax - w;
-        if (maxX < xMin) { container.removeChild(span); continue; } // non ci sta nemmeno da solo in questa striscia
-        for (var t = 0; t < TRIES_PER_WORD; t++) {
-          var x = xMin + Math.random() * (maxX - xMin);
-          var y = Math.random() * Math.max(1, H - h);
-          var box = { x1: x - MARGIN, x2: x + w + MARGIN, y1: y - MARGIN, y2: y + h + MARGIN };
-          if (!placed.some(function (p) { return rectsOverlap(box, p); })) {
-            span.style.left = x + 'px';
-            span.style.top = y + 'px';
-            span.style.visibility = 'visible';
-            placed.push(box);
-            return true;
-          }
-        }
-        container.removeChild(span);
-      }
-      return false;
-    }
-
-    // ---- passo 1: garantisco almeno 2 parole nella striscia di sinistra e 2 in quella di destra ----
-    var byLength = pool.slice().sort(function (a, b) { return a.length - b.length; });
-    var used = {};
-    function placeShortestAvailable(xMin, xMax, count) {
-      var placedHere = 0;
-      for (var i = 0; i < byLength.length && placedHere < count; i++) {
-        var word = byLength[i];
-        if (used[word]) continue;
-        if (tryPlaceInRange(word, xMin, xMax)) { used[word] = true; placedHere++; }
-      }
-    }
-    placeShortestAvailable(0, EXCLUDE.x1, 2);
-    placeShortestAvailable(EXCLUDE.x2, W, 2);
-
-    // ---- passo 2: il resto delle parole, sparse su tutto lo schermo ----
-    var remaining = pool.filter(function (w) { return !used[w]; }).slice(0, WORD_COUNT);
-    remaining.forEach(function (word) {
-      var fontSize = 13 + Math.random() * 24;
+    // Disposizione fissa, scelta a mano (posizioni in % dello schermo).
+    var LAYOUT = [
+      { w: 'LUNGO',      left: 19, top: 12, size: 22 },
+      { w: 'CORTECCIA',  left: 52, top: 11, size: 34 },
+      { w: 'CASSAFORTE', left: 20, top: 27, size: 26 },
+      { w: 'REGALI',     left: 44, top: 29, size: 16 },
+      { w: 'ORA',        left: 83, top: 36, size: 20 },
+      { w: 'ON',         left: 5,  top: 40, size: 18 },
+      { w: 'VENDERE',    left: 36, top: 45, size: 22 },
+      { w: 'ALGHE',      left: 57, top: 43, size: 26 },
+      { w: 'RE',         left: 6,  top: 53, size: 18 },
+      { w: 'MESE',       left: 85, top: 52, size: 24 },
+      { w: 'NUOTO',      left: 4,  top: 68, size: 18 },
+      { w: 'ABETE',      left: 1,  top: 76, size: 22 },
+      { w: 'SU',         left: 90, top: 76, size: 16 },
+      { w: 'BAFFI',      left: 12, top: 80, size: 32 },
+      { w: 'NEVE',       left: 40, top: 81, size: 24 },
+      { w: 'GASOLIO',    left: 78, top: 82, size: 30 },
+      { w: 'STELLA',     left: 22, top: 89, size: 34 },
+      { w: 'PADRINO',    left: 60, top: 91, size: 24 },
+      { w: 'AGNELLO',    left: 7,  top: 96, size: 32 },
+      { w: 'CAMPANELLA', left: 42, top: 96, size: 32 }
+    ];
+    LAYOUT.forEach(function (item) {
       var span = document.createElement('span');
       span.className = 'splash-word';
-      span.textContent = word;
-      span.style.fontSize = fontSize + 'px';
-      span.style.visibility = 'hidden';
+      span.textContent = item.w;
+      span.style.left = item.left + '%';
+      span.style.top = item.top + '%';
+      span.style.fontSize = item.size + 'px';
       container.appendChild(span);
-      var w = span.offsetWidth;
-      var h = span.offsetHeight;
-
-      var found = false;
-      for (var t = 0; t < TRIES_PER_WORD; t++) {
-        var x = Math.random() * Math.max(1, W - w);
-        var y = Math.random() * Math.max(1, H - h);
-        var box = { x1: x - MARGIN, x2: x + w + MARGIN, y1: y - MARGIN, y2: y + h + MARGIN };
-        var collides = placed.some(function (p) { return rectsOverlap(box, p); });
-        if (!collides) {
-          span.style.left = x + 'px';
-          span.style.top = y + 'px';
-          span.style.visibility = 'visible';
-          placed.push(box);
-          found = true;
-          break;
-        }
-      }
-      if (!found) container.removeChild(span); // non ci stava senza toccare altro: la saltiamo
     });
   }
   setupSplashWords();
