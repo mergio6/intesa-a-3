@@ -38,12 +38,12 @@
     --panel-2: #E7EAF7;
     --text: #10162C;
     --text-dim: #5B6184;
-    --blue: #3454F4;
-    --blue-dark: #2340C2;
-    --green: #17A463;
-    --green-dark: #10824E;
-    --orange: #F2834A;
-    --orange-dark: #D9661F;
+    --blue: #1D72E0;
+    --blue-dark: #14539F;
+    --green: #2FAE60;
+    --green-dark: #1F8E4C;
+    --orange: #F2994A;
+    --orange-dark: #D9781E;
     --border: #D7DBEF;
     --shadow: rgba(16, 22, 60, 0.14);
     --stage-bg: #E1E6FC;
@@ -51,8 +51,12 @@
     --stage-border: #C8D0F3;
     --stage-overlay: rgba(16, 22, 60, 0.08);
     --stage-placeholder: rgba(16, 22, 60, 0.42);
-    --red: #E6384F;
-    --red-dark: #BE2740;
+    --wash-blue: rgba(29, 114, 224, 0.10);
+    --wash-green: rgba(47, 174, 96, 0.10);
+    --wash-orange: rgba(242, 153, 74, 0.12);
+    --wash-red: rgba(224, 59, 59, 0.10);
+    --red: #E03B3B;
+    --red-dark: #B92C2C;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -62,12 +66,12 @@
       --panel-2: #1A234A;
       --text: #EEF1FD;
       --text-dim: #9AA2C9;
-      --blue: #6680FF;
-      --blue-dark: #3454F4;
-      --green: #2FD17E;
-      --green-dark: #17A463;
-      --orange: #FFA368;
-      --orange-dark: #F2834A;
+      --blue: #4F9CFF;
+      --blue-dark: #2E7FE0;
+      --green: #3FD07A;
+      --green-dark: #28A85C;
+      --orange: #FFA94D;
+      --orange-dark: #E8892B;
       --border: #262F57;
       --shadow: rgba(0, 0, 0, 0.5);
       --stage-bg: #060913;
@@ -75,8 +79,12 @@
       --stage-border: #242D52;
       --stage-overlay: rgba(255, 255, 255, 0.14);
       --stage-placeholder: rgba(238, 241, 253, 0.48);
-      --red: #FF5C72;
-      --red-dark: #E6384F;
+      --wash-blue: rgba(79, 156, 255, 0.28);
+      --wash-green: rgba(63, 208, 122, 0.26);
+      --wash-orange: rgba(255, 169, 77, 0.26);
+      --wash-red: rgba(255, 92, 92, 0.26);
+      --red: #FF5C5C;
+      --red-dark: #E03B3B;
     }
   }
   :root[data-theme="dark"] {
@@ -86,12 +94,12 @@
     --panel-2: #1A234A;
     --text: #EEF1FD;
     --text-dim: #9AA2C9;
-    --blue: #6680FF;
-    --blue-dark: #3454F4;
-    --green: #2FD17E;
-    --green-dark: #17A463;
-    --orange: #FFA368;
-    --orange-dark: #F2834A;
+    --blue: #4F9CFF;
+    --blue-dark: #2E7FE0;
+    --green: #3FD07A;
+    --green-dark: #28A85C;
+    --orange: #FFA94D;
+    --orange-dark: #E8892B;
     --border: #262F57;
     --shadow: rgba(0, 0, 0, 0.5);
     --stage-bg: #060913;
@@ -99,8 +107,12 @@
     --stage-border: #242D52;
     --stage-overlay: rgba(255, 255, 255, 0.14);
     --stage-placeholder: rgba(238, 241, 253, 0.48);
-    --red: #FF5C72;
-    --red-dark: #E6384F;
+    --wash-blue: rgba(79, 156, 255, 0.28);
+    --wash-green: rgba(63, 208, 122, 0.26);
+    --wash-orange: rgba(255, 169, 77, 0.26);
+    --wash-red: rgba(255, 92, 92, 0.26);
+    --red: #FF5C5C;
+    --red-dark: #E03B3B;
   }
 
   * { box-sizing: border-box; }
@@ -171,7 +183,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 6px 18px -6px rgba(23, 164, 99, 0.45);
+    box-shadow: 0 6px 18px -6px rgba(47, 174, 96, 0.45);
   }
   .score-hero .label {
     font-family: 'Big Shoulders Display', sans-serif;
@@ -394,9 +406,9 @@
   body.tiebreak-mode #score-row [data-delta="-2"],
   body.tiebreak-mode #score-row [data-delta="2"] { display: none; }
 
-  button.btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 12px -3px rgba(52, 84, 244, 0.5); }
-  button.btn.double { background: var(--orange); border-color: var(--orange); color: #1B1300; box-shadow: 0 4px 12px -3px rgba(242, 131, 74, 0.5); }
-  button.btn.stop { background: var(--red); border-color: var(--red); color: #fff; font-size: clamp(13px, 3.4vw, 15px); box-shadow: 0 4px 12px -3px rgba(230, 56, 79, 0.5); }
+  button.btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 12px -3px rgba(29, 114, 224, 0.5); }
+  button.btn.double { background: var(--orange); border-color: var(--orange); color: #1B1300; box-shadow: 0 4px 12px -3px rgba(242, 153, 74, 0.5); }
+  button.btn.stop { background: var(--red); border-color: var(--red); color: #fff; font-size: clamp(13px, 3.4vw, 15px); box-shadow: 0 4px 12px -3px rgba(224, 59, 59, 0.5); }
   button.btn.plus { color: var(--green-dark); border-color: var(--green); }
   button.btn.minus { color: var(--red-dark); border-color: var(--red); }
   button.btn.neutral { color: var(--text-dim); }
@@ -480,6 +492,47 @@
     justify-content: center;
   }
   .back-arrow-btn + h2 { margin-top: 8px; }
+
+  /* --- Schermate carosello "senza finestra": nessun box, carte libere sullo sfondo --- */
+  .carousel-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 380px;
+  }
+  .carousel-screen h2 {
+    margin: 0;
+    font-size: 19px;
+    text-align: center;
+    color: #fff;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  .overlay-back-btn, .overlay-howto-btn {
+    position: absolute;
+    top: 18px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .overlay-back-btn { left: 18px; }
+  .overlay-howto-btn { right: 18px; }
+  .overlay-howto-btn svg, .overlay-back-btn svg { width: 17px; height: 17px; }
   .mode-card h2 {
     margin: 0 0 4px;
     font-size: 17px;
@@ -499,10 +552,92 @@
     transition: transform 0.08s ease, box-shadow 0.08s ease;
   }
   button.mode-btn:active { transform: scale(0.97); }
-  button.mode-btn.easy { background: var(--green); border-color: var(--green); color: #0A2016; box-shadow: 0 4px 14px -4px rgba(23, 164, 99, 0.55); }
-  button.mode-btn.hard { background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 4px 14px -4px rgba(230, 56, 79, 0.55); }
-  button.mode-btn.classic { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 14px -4px rgba(52, 84, 244, 0.55); }
+  button.mode-btn.easy { background: var(--green); border-color: var(--green); color: #0A2016; box-shadow: 0 4px 14px -4px rgba(47, 174, 96, 0.55); }
+  button.mode-btn.hard { background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 4px 14px -4px rgba(224, 59, 59, 0.55); }
+  button.mode-btn.classic { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 14px -4px rgba(29, 114, 224, 0.55); }
   button.mode-btn.howto { background: var(--panel-2); border-color: var(--border); color: var(--text-dim); }
+
+  /* --- Carosello 3D (scelta modalità / difficoltà) --- */
+  .carousel-viewport {
+    width: 100%;
+    height: 196px;
+    position: relative;
+    perspective: 1100px;
+    touch-action: pan-y;
+  }
+  .carousel-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+  }
+  .carousel-card {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 164px;
+    height: 100%;
+    margin-left: -82px;
+    background: var(--panel);
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    padding: 18px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    text-align: center;
+    cursor: grab;
+    box-shadow: 0 10px 24px -10px var(--shadow);
+    transition: transform 0.5s cubic-bezier(.34,1.56,.64,1), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease;
+    user-select: none;
+  }
+  .carousel-card.dragging { transition: none; cursor: grabbing; }
+  .carousel-card .c-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+  .carousel-card .c-icon svg { width: 21px; height: 21px; }
+  .carousel-card .c-title {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 0.01em;
+    line-height: 1.05;
+  }
+  .carousel-card .c-desc { font-size: 10.5px; color: var(--text-dim); line-height: 1.3; }
+
+  .carousel-card[data-cmode="facile"] { background: linear-gradient(165deg, var(--wash-green) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="facile"] .c-icon { background: var(--green); color: #0A2016; }
+  .carousel-card[data-cmode="facile"] .c-title { color: var(--green); }
+  .carousel-card[data-cmode="difficile"] { background: linear-gradient(165deg, var(--wash-red) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="difficile"] .c-icon { background: var(--red); color: #fff; }
+  .carousel-card[data-cmode="difficile"] .c-title { color: var(--red); }
+  .carousel-card[data-cmode="classica"] { background: linear-gradient(165deg, var(--wash-blue) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="classica"] .c-icon { background: var(--blue); color: #fff; }
+  .carousel-card[data-cmode="classica"] .c-title { color: var(--blue); }
+  .carousel-card[data-cmode="allenamento"] { background: linear-gradient(165deg, var(--wash-blue) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="allenamento"] .c-icon { background: var(--blue); color: #fff; }
+  .carousel-card[data-cmode="allenamento"] .c-title { color: var(--blue); }
+  .carousel-card[data-cmode="sfida"] { background: linear-gradient(165deg, var(--wash-orange) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="sfida"] .c-icon { background: var(--orange); color: #1B1300; }
+  .carousel-card[data-cmode="sfida"] .c-title { color: var(--orange-dark); }
+  .carousel-card[data-cmode^="team"] { background: linear-gradient(165deg, var(--wash-blue) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode^="team"] .c-icon { background: var(--blue); color: #fff; }
+  .carousel-card[data-cmode^="team"] .c-title { color: var(--blue); }
+
+  .carousel-dots { display: flex; justify-content: center; gap: 7px; margin-top: 2px; }
+  .carousel-dots .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--border);
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .carousel-dots .dot.active { background: var(--text); transform: scale(1.3); }
 
   .howto-card {
     max-width: 480px;
@@ -906,31 +1041,80 @@
 </div>
 
 <div class="mode-overlay" id="top-mode-overlay">
-  <div class="mode-card">
+  <button class="overlay-howto-btn" id="btn-howto" aria-label="Come si gioca?">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.8 1c0 1.5-2.3 1.7-2.3 3.3"/><path d="M12 17.2v.1"/></svg>
+  </button>
+  <div class="carousel-screen">
     <h2>Scegli la modalità di gioco</h2>
-    <button class="mode-btn classic" data-topmode="allenamento">Modalità allenamento</button>
-    <button class="mode-btn hard" data-topmode="sfida">Modalità sfida</button>
-    <button class="mode-btn howto" id="btn-howto">Come si gioca?</button>
+    <div class="carousel-viewport" id="carousel-topmode">
+      <div class="carousel-track" id="carousel-topmode-track">
+        <div class="carousel-card" data-cmode="allenamento">
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5"/><path d="m8 5-3 3"/><path d="m19 16-3 3"/><rect x="2.5" y="14.5" width="6" height="2.6" rx="1.3" transform="rotate(-45 5.5 15.8)"/><rect x="15.5" y="1.5" width="6" height="2.6" rx="1.3" transform="rotate(-45 18.5 2.8)"/></svg></div>
+          <div class="c-title">Allenamento</div>
+          <div class="c-desc">Gioca da solo o in coppia</div>
+        </div>
+        <div class="carousel-card" data-cmode="sfida">
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a2 2 0 0 0 0 4h1"/><path d="M17 6h3a2 2 0 0 1 0 4h-1"/></svg></div>
+          <div class="c-title">Sfida</div>
+          <div class="c-desc">2-4 squadre, con classifica</div>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-dots" id="carousel-topmode-dots"></div>
   </div>
 </div>
 
 <div class="mode-overlay" id="mode-overlay" style="display:none;">
-  <div class="mode-card">
-    <button class="back-arrow-btn" id="btn-back-mode" aria-label="Indietro">←</button>
+  <button class="overlay-back-btn" id="btn-back-mode" aria-label="Indietro">←</button>
+  <div class="carousel-screen">
     <h2>Scegli la difficoltà di gioco</h2>
-    <button class="mode-btn easy" data-mode="facile">Modalità facile</button>
-    <button class="mode-btn hard" data-mode="difficile">Modalità difficile</button>
-    <button class="mode-btn classic" data-mode="classica">Modalità classica</button>
+    <div class="carousel-viewport" id="carousel-difficulty">
+      <div class="carousel-track" id="carousel-difficulty-track">
+        <div class="carousel-card" data-cmode="facile">
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div class="c-title">Facile</div>
+          <div class="c-desc">Parole semplici</div>
+        </div>
+        <div class="carousel-card" data-cmode="classica">
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div>
+          <div class="c-title">Classica</div>
+          <div class="c-desc">Mix equilibrato, come in TV</div>
+        </div>
+        <div class="carousel-card" data-cmode="difficile">
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg></div>
+          <div class="c-title">Difficile</div>
+          <div class="c-desc">Termini meno comuni</div>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-dots" id="carousel-difficulty-dots"></div>
   </div>
 </div>
 
 <div class="mode-overlay" id="challenge-teamcount-overlay" style="display:none;">
-  <div class="mode-card">
-    <button class="back-arrow-btn" id="btn-back-teamcount" aria-label="Indietro">←</button>
+  <button class="overlay-back-btn" id="btn-back-teamcount" aria-label="Indietro">←</button>
+  <div class="carousel-screen">
     <h2>In quante squadre siete?</h2>
-    <button class="mode-btn classic" data-teamcount="2">2 squadre</button>
-    <button class="mode-btn classic" data-teamcount="3">3 squadre</button>
-    <button class="mode-btn classic" data-teamcount="4">4 squadre</button>
+    <div class="carousel-viewport" id="carousel-teamcount">
+      <div class="carousel-track" id="carousel-teamcount-track">
+        <div class="carousel-card" data-cmode="team2">
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="c-title">2</div>
+          <div class="c-desc">squadre</div>
+        </div>
+        <div class="carousel-card" data-cmode="team3">
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="c-title">3</div>
+          <div class="c-desc">squadre</div>
+        </div>
+        <div class="carousel-card" data-cmode="team4">
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="c-title">4</div>
+          <div class="c-desc">squadre</div>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-dots" id="carousel-teamcount-dots"></div>
   </div>
 </div>
 
@@ -1822,31 +2006,96 @@
   }
   function resetWordPools() { resetPoolsOnly(); resetRoundFlags(); }
 
-  document.querySelectorAll('.mode-btn[data-mode]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      playClickSound();
-      challengeMode = false;
-      gameMode = btn.getAttribute('data-mode');
-      resetWordPools();
-      updateModeLabel();
-      teamNameBannerEl.hidden = true;
-      enterGameplay();
-      enterPlayPhase();
+  // ---------- carosello 3D (scelta modalità / difficoltà) ----------
+  function createCarousel3D(trackId, dotsId, startIndex, onSelect) {
+    var track = document.getElementById(trackId);
+    var cards = Array.prototype.slice.call(track.querySelectorAll('.carousel-card'));
+    var dotsWrap = document.getElementById(dotsId);
+    var activeIndex = startIndex || 0;
+    var dragging = false, dragStartX = 0, dragDeltaX = 0, moved = false;
+
+    dotsWrap.innerHTML = '';
+    cards.forEach(function () {
+      var dot = document.createElement('div');
+      dot.className = 'dot';
+      dotsWrap.appendChild(dot);
     });
+    var dots = Array.prototype.slice.call(dotsWrap.children);
+
+    function render(extraPx) {
+      extraPx = extraPx || 0;
+      cards.forEach(function (card, i) {
+        var offset = i - activeIndex;
+        var dragShift = extraPx / 2.6;
+        var x = offset * 78 + dragShift;
+        var z = -Math.abs(offset) * 110;
+        var rot = offset * -28 + extraPx / 9;
+        var scale = offset === 0 ? 1 : 0.82;
+        var opacity = Math.abs(offset) > 1 ? 0 : (offset === 0 ? 1 : 0.62);
+        card.style.transform = 'translateX(' + x + '%) translateZ(' + z + 'px) rotateY(' + rot + 'deg) scale(' + scale + ')';
+        card.style.opacity = opacity;
+        card.style.filter = offset === 0 ? 'blur(0px)' : 'blur(1.5px)';
+        card.style.pointerEvents = Math.abs(offset) > 1 ? 'none' : 'auto';
+        card.style.zIndex = String(10 - Math.abs(offset));
+      });
+      dots.forEach(function (d, i) { d.classList.toggle('active', i === activeIndex); });
+    }
+    function goTo(i) {
+      activeIndex = Math.max(0, Math.min(cards.length - 1, i));
+      render();
+    }
+    // Selezione immediata: toccare una carta qualsiasi la sceglie subito
+    // (la porta al centro se non lo è già) e conferma la scelta.
+    function selectCard(i) {
+      if (i !== activeIndex) { activeIndex = i; render(); }
+      playClickSound();
+      if (onSelect) onSelect(cards[i].getAttribute('data-cmode'));
+    }
+    cards.forEach(function (card, i) {
+      card.addEventListener('click', function () { if (!moved) selectCard(i); });
+    });
+    var vp = track.parentElement;
+    vp.addEventListener('pointerdown', function (e) {
+      dragging = true; dragStartX = e.clientX; dragDeltaX = 0; moved = false;
+      cards.forEach(function (c) { c.classList.add('dragging'); });
+    });
+    window.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      dragDeltaX = e.clientX - dragStartX;
+      if (Math.abs(dragDeltaX) > 4) moved = true;
+      render(dragDeltaX / 2);
+    });
+    window.addEventListener('pointerup', function () {
+      if (!dragging) return;
+      dragging = false;
+      cards.forEach(function (c) { c.classList.remove('dragging'); });
+      // Un trascinamento sposta soltanto il carosello, non conferma nulla.
+      if (dragDeltaX < -36) goTo(activeIndex + 1);
+      else if (dragDeltaX > 36) goTo(activeIndex - 1);
+      else render();
+      dragDeltaX = 0;
+    });
+    render();
+  }
+
+  var topModeCarousel = createCarousel3D('carousel-topmode-track', 'carousel-topmode-dots', 0, function (choice) {
+    if (choice === 'allenamento') {
+      challengeMode = false;
+      showModeOverlay();
+    } else if (choice === 'sfida') {
+      showTeamcountOverlay();
+    }
   });
 
-  // ---------- menu iniziale: allenamento / sfida / come si gioca ----------
-  document.querySelectorAll('#top-mode-overlay [data-topmode]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      playClickSound();
-      var choice = btn.getAttribute('data-topmode');
-      if (choice === 'allenamento') {
-        challengeMode = false;
-        showModeOverlay();
-      } else if (choice === 'sfida') {
-        showTeamcountOverlay();
-      }
-    });
+  var difficultyCarousel = createCarousel3D('carousel-difficulty-track', 'carousel-difficulty-dots', 1, function (choice) {
+    // classica al centro di default
+    challengeMode = false;
+    gameMode = choice;
+    resetWordPools();
+    updateModeLabel();
+    teamNameBannerEl.hidden = true;
+    enterGameplay();
+    enterPlayPhase();
   });
 
   // ---------- modalità sfida: numero squadre e nomi ----------
@@ -1857,13 +2106,10 @@
   var challengeCurrentPos = 0; // posizione corrente in challengeTeamOrder
   var teamNameBannerEl = document.getElementById('team-name-banner');
 
-  document.querySelectorAll('#challenge-teamcount-overlay [data-teamcount]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      playClickSound();
-      challengeTeamCount = parseInt(btn.getAttribute('data-teamcount'), 10);
-      buildTeamNameInputs(challengeTeamCount);
-      showNamesOverlay();
-    });
+  var teamcountCarousel = createCarousel3D('carousel-teamcount-track', 'carousel-teamcount-dots', 0, function (choice) {
+    challengeTeamCount = parseInt(choice.replace('team', ''), 10);
+    buildTeamNameInputs(challengeTeamCount);
+    showNamesOverlay();
   });
 
   function buildTeamNameInputs(n) {
