@@ -350,13 +350,13 @@
   .team-name-banner {
     text-align: center;
     font-family: 'Big Shoulders Display', sans-serif;
-    font-size: calc(clamp(18px, 5.5vw, 24px) * var(--game-text-scale, 1));
+    font-size: calc(clamp(24px, 7vw, 36px) * var(--game-text-scale, 1));
     font-weight: 800;
     color: var(--orange-dark);
     background: var(--panel-2);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 6px 10px;
+    border-radius: 16px;
+    padding: clamp(8px, 1.8vh, 14px) 18px;
     letter-spacing: 0.02em;
     text-transform: uppercase;
   }
@@ -468,7 +468,7 @@
   .word-box .word {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800;
-    font-size: calc(clamp(26px, 8vw, 40px) * var(--game-text-scale, 1));
+    font-size: calc(clamp(30px, 9.5vw, 46px) * var(--game-text-scale, 1));
     line-height: 1.15;
     word-break: break-word;
     text-transform: uppercase;
@@ -577,6 +577,11 @@
     justify-content: center;
     padding: 20px;
     z-index: 50;
+  }
+  #challenge-results-overlay {
+    background: rgba(8, 14, 26, 0.45);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
   }
   #menu-backdrop {
     position: fixed;
@@ -1231,6 +1236,8 @@
   <section id="view-play" class="view active">
 
     <div class="scoreboard">
+      <div class="team-name-banner" id="team-name-banner" hidden></div>
+      <div class="team-name-banner tiebreak-target-banner" id="tiebreak-target-banner" hidden>Tempo da battere: -</div>
       <div class="score-hero">
         <span class="label">Punteggio</span>
         <span class="value" id="score-value">0</span>
@@ -1245,8 +1252,6 @@
           <span class="value" id="raddoppi-value">2</span>
         </div>
       </div>
-      <div class="team-name-banner" id="team-name-banner" hidden></div>
-      <div class="team-name-banner tiebreak-target-banner" id="tiebreak-target-banner" hidden>Tempo da battere: -</div>
     </div>
 
     <div class="stage">
@@ -1393,7 +1398,7 @@
       <p><strong>Durata partita.</strong> Ogni manche ha una durata di 60 secondi. I tasti "Nuova parola" e "Raddoppio" fanno comparire la parola e avviano il conto alla rovescia. Quando il terzo giocatore alza la mano per tentare la risposta, si preme STOP per fermare il tempo. Il terzo giocatore ha 3 secondi di tempo per tentare la risposta, altrimenti la mancata risposta corrisponde a un errore. Quando i 60 secondi terminano, i due giocatori devono fermarsi immediatamente, ma il terzo giocatore può comunque tentare la risposta se pensa di aver ricevuto abbastanza indizi.</p>
       <p><strong>Punteggio.</strong> Indovinare la parola misteriosa garantisce un +1 in caso di risposta corretta o un −1 in caso di risposta sbagliata. Se i due giocatori sono in difficoltà possono anche passare la parola (fino a 3 volte a partita) senza guadagnare né perdere punti. Il passo <u>non</u> può essere utilizzato dal giocatore che indovina la parola.</p>
       <p><strong>Raddoppio.</strong> Se il punteggio della squadra è di almeno 2 punti, i tre giocatori possono accordarsi sul tentare un raddoppio. La posta in palio aumenta, garantendo +2 punti in caso di successo o −2 in caso il terzo giocatore dovesse sbagliare. Si hanno 2 raddoppi a disposizione per ogni partita. Il passo è utilizzabile anche con i raddoppi.</p>
-      <p><strong>Modalità di gioco.</strong> È possibile giocare in <em>"Modalità Allenamento"</em> per allenarsi con i propri amici scegliendo la difficoltà delle parole; <em>Facile</em>: le parole proposte richiedono una formulazione semplice della domanda. <em>Difficile</em>: le parole proposte sono più complesse e richiedono una formulazione più precisa e articolata della domanda. <em>Classica</em>: la più equilibrata, con parole sia facili che difficili e un bilanciamento generale che rende l'allenamento piacevole e sfidante per qualsiasi gruppo di gioco. La <em>"Modalità Sfida"</em> è pensata per sfidarsi tra gruppi di gioco con la difficoltà classica. Si possono sfidare tra loro fino a 4 squadre. In caso di parità finale, per decretare il vincitore si procederà a uno spareggio nel quale bisognerà indovinare una parola nel minor numero di secondi possibile.</p>
+      <p><strong>Modalità di gioco.</strong> È possibile giocare in <em>"Modalità Allenamento"</em> per allenarsi con i propri amici scegliendo la difficoltà delle parole:<br><em>Facile</em>: le parole proposte richiedono una formulazione semplice della domanda.<br><em>Difficile</em>: le parole proposte sono più complesse e richiedono una formulazione più precisa e articolata della domanda.<br><em>Classica</em>: la più equilibrata, con parole sia facili che difficili e un bilanciamento generale che rende l'allenamento piacevole e sfidante per qualsiasi gruppo di gioco.<br>La <em>"Modalità Sfida"</em> è pensata per sfidarsi tra gruppi di gioco con la difficoltà classica. Si possono sfidare tra loro fino a 4 squadre. In caso di parità finale, per decretare il vincitore si procederà a uno spareggio nel quale bisognerà indovinare una parola nel minor numero di secondi possibile.</p>
     </div>
   </div>
 </div>
