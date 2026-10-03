@@ -115,7 +115,8 @@
     --red-dark: #E03B3B;
   }
 
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  button { outline: none; }
   html, body { height: 100%; margin: 0; padding: 0; }
   body {
     background: radial-gradient(120% 90% at 50% -10%, var(--bg-glow) 0%, var(--bg) 55%);
@@ -482,6 +483,30 @@
     z-index: 0;
     pointer-events: none;
   }
+  .floating-words {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .floating-word {
+    position: absolute;
+    bottom: -10%;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    color: var(--text-dim);
+    opacity: 0;
+    white-space: nowrap;
+    animation: floatWordUp linear infinite;
+  }
+  @keyframes floatWordUp {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    8% { opacity: 0.16; }
+    92% { opacity: 0.16; }
+    100% { transform: translateY(-115vh) translateX(var(--word-drift, 0px)); opacity: 0; }
+  }
   .mode-overlay::before {
     top: -14%;
     left: -18%;
@@ -601,7 +626,7 @@
   /* --- Carosello 3D (scelta modalità / difficoltà) --- */
   .carousel-viewport {
     width: 100%;
-    height: clamp(280px, 54vh, 440px);
+    height: clamp(300px, 54vh, 440px);
     position: relative;
     perspective: 1300px;
     touch-action: pan-y;
@@ -614,20 +639,20 @@
   }
   .carousel-card {
     position: absolute;
-    top: 50%;
+    top: 0;
     left: 50%;
-    width: min(72vw, 270px);
-    max-height: 100%;
-    margin-left: calc(min(72vw, 270px) / -2);
+    width: min(70vw, 260px);
+    height: 100%;
+    margin-left: calc(min(70vw, 260px) / -2);
     background: var(--panel);
-    border-radius: 26px;
+    border-radius: 30px;
     border: 1px solid var(--border);
-    padding: 28px 20px;
+    padding: 30px 18px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 14px;
     text-align: center;
     cursor: grab;
     box-shadow: 0 16px 36px -14px var(--shadow);
@@ -693,6 +718,8 @@
     cursor: pointer;
     flex: 0 0 auto;
   }
+  .settings-btn { transition: transform 0.08s ease, background 0.08s ease; }
+  .settings-btn:active { transform: scale(0.92); background: var(--panel-2); }
   .btn-howto-badge {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800;
@@ -1083,6 +1110,7 @@
 </div>
 
 <div class="mode-overlay" id="top-mode-overlay">
+  <div class="floating-words" id="floating-words-topmode"></div>
   <div class="carousel-screen">
     <h2 class="sr-only">Scegli la modalità di gioco</h2>
     <div class="carousel-viewport" id="carousel-topmode">
@@ -1103,6 +1131,7 @@
 </div>
 
 <div class="mode-overlay" id="mode-overlay" style="display:none;">
+  <div class="floating-words" id="floating-words-difficulty"></div>
   <button class="overlay-back-btn" id="btn-back-mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span>Indietro</span></button>
   <div class="carousel-screen">
     <h2 class="sr-only">Scegli la difficoltà di gioco</h2>
@@ -1129,6 +1158,7 @@
 </div>
 
 <div class="mode-overlay" id="challenge-teamcount-overlay" style="display:none;">
+  <div class="floating-words" id="floating-words-teamcount"></div>
   <button class="overlay-back-btn" id="btn-back-teamcount"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span>Indietro</span></button>
   <div class="carousel-screen">
     <h2 class="sr-only">In quante squadre siete?</h2>
@@ -2043,6 +2073,40 @@
   function resetWordPools() { resetPoolsOnly(); resetRoundFlags(); }
 
   // ---------- carosello 3D (scelta modalità / difficoltà) ----------
+  // ---------- parole fluttuanti di sfondo (menu) ----------
+  function setupFloatingWords() {
+    var containers = document.querySelectorAll('.floating-words');
+    if (!containers.length) return;
+    var pool = (facileBank.list.length ? facileBank.list : DEFAULT_SINGLE_WORDS).slice();
+    if (!pool.length) return;
+    // mescola e prende un sottoinsieme
+    for (var i = pool.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+    }
+    var WORDS_PER_SCREEN = 9;
+    containers.forEach(function (container) {
+      var chosen = pool.slice(0, WORDS_PER_SCREEN);
+      chosen.forEach(function (word, i) {
+        var span = document.createElement('span');
+        span.className = 'floating-word';
+        span.textContent = word;
+        var left = 4 + Math.random() * 86;
+        var size = 15 + Math.random() * 20;
+        var duration = 22 + Math.random() * 16;
+        var delay = -Math.random() * duration;
+        var drift = (Math.random() * 60 - 30).toFixed(0) + 'px';
+        span.style.left = left + '%';
+        span.style.fontSize = size + 'px';
+        span.style.animationDuration = duration + 's';
+        span.style.animationDelay = delay + 's';
+        span.style.setProperty('--word-drift', drift);
+        container.appendChild(span);
+      });
+    });
+  }
+  setupFloatingWords();
+
   function createCarousel3D(trackId, startIndex, onSelect) {
     var track = document.getElementById(trackId);
     var cards = Array.prototype.slice.call(track.querySelectorAll('.carousel-card'));
@@ -2059,7 +2123,7 @@
         var rot = offset * -26 + extraPx / 9;
         var scale = offset === 0 ? 1 : 0.82;
         var opacity = Math.abs(offset) > 1 ? 0 : (offset === 0 ? 1 : 0.62);
-        card.style.transform = 'translateY(-50%) translateX(' + x + '%) translateZ(' + z + 'px) rotateY(' + rot + 'deg) scale(' + scale + ')';
+        card.style.transform = 'translateX(' + x + '%) translateZ(' + z + 'px) rotateY(' + rot + 'deg) scale(' + scale + ')';
         card.style.opacity = opacity;
         card.style.filter = offset === 0 ? 'blur(0px)' : 'blur(1.5px)';
         card.style.pointerEvents = Math.abs(offset) > 1 ? 'none' : 'auto';
@@ -2957,6 +3021,7 @@
   var howtoOverlayEl = document.getElementById('howto-overlay');
   document.getElementById('btn-howto').addEventListener('click', function () {
     playClickSound();
+    settingsOverlayEl.style.display = 'none';
     howtoOverlayEl.style.display = 'flex';
   });
   document.getElementById('btn-howto-close').addEventListener('click', function () {
@@ -2997,6 +3062,7 @@
     syncTextSizeUI();
     syncThemeUI();
     updateSyncStatusUI();
+    howtoOverlayEl.style.display = 'none';
     settingsOverlayEl.style.display = 'flex';
     playClickSound();
   });
