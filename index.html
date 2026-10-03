@@ -143,7 +143,6 @@
     flex: 0 0 auto;
     position: relative;
     z-index: 60;
-    background: var(--bg);
   }
   .topbar-logo {
     width: 34px;
@@ -445,7 +444,6 @@
     letter-spacing: 0.02em;
     position: relative;
     z-index: 60;
-    background: var(--bg);
   }
 
   .mode-overlay {
@@ -454,7 +452,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(8, 14, 26, 0.6);
+    background: radial-gradient(120% 90% at 50% -10%, var(--bg-glow) 0%, var(--bg) 55%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -498,41 +496,63 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+    gap: clamp(18px, 4vh, 32px);
     width: 100%;
-    max-width: 380px;
+    max-width: 520px;
+    height: 100%;
+    padding-bottom: 64px;
+    box-sizing: border-box;
   }
   .carousel-screen h2 {
     margin: 0;
-    font-size: 19px;
+    font-size: clamp(20px, 5vw, 25px);
     text-align: center;
-    color: #fff;
+    color: var(--text);
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800;
     letter-spacing: 0.01em;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
   }
-  .overlay-back-btn, .overlay-howto-btn {
+  .overlay-howto-btn {
     position: absolute;
     top: 18px;
-    width: 36px;
-    height: 36px;
+    right: 18px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.18);
-    background: rgba(255,255,255,0.1);
-    color: #fff;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text-dim);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    backdrop-filter: blur(6px);
-    font-size: 16px;
-    font-weight: 800;
-    line-height: 1;
+    box-shadow: 0 4px 12px -4px var(--shadow);
   }
-  .overlay-back-btn { left: 18px; }
-  .overlay-howto-btn { right: 18px; }
-  .overlay-howto-btn svg, .overlay-back-btn svg { width: 17px; height: 17px; }
+  .overlay-howto-btn svg { width: 18px; height: 18px; }
+  .overlay-back-btn {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    max-width: 320px;
+    margin: 0 auto;
+    height: 50px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 14.5px;
+    box-shadow: 0 6px 18px -8px var(--shadow);
+  }
+  .overlay-back-btn svg { width: 18px; height: 18px; }
   .mode-card h2 {
     margin: 0 0 4px;
     font-size: 17px;
@@ -560,9 +580,9 @@
   /* --- Carosello 3D (scelta modalità / difficoltà) --- */
   .carousel-viewport {
     width: 100%;
-    height: 196px;
+    height: clamp(280px, 54vh, 440px);
     position: relative;
-    perspective: 1100px;
+    perspective: 1300px;
     touch-action: pan-y;
   }
   .carousel-track {
@@ -575,43 +595,43 @@
     position: absolute;
     top: 0;
     left: 50%;
-    width: 164px;
+    width: min(72vw, 270px);
     height: 100%;
-    margin-left: -82px;
+    margin-left: calc(min(72vw, 270px) / -2);
     background: var(--panel);
-    border-radius: 18px;
+    border-radius: 26px;
     border: 1px solid var(--border);
-    padding: 18px 14px;
+    padding: 30px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 7px;
+    gap: 14px;
     text-align: center;
     cursor: grab;
-    box-shadow: 0 10px 24px -10px var(--shadow);
+    box-shadow: 0 16px 36px -14px var(--shadow);
     transition: transform 0.5s cubic-bezier(.34,1.56,.64,1), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease;
     user-select: none;
   }
   .carousel-card.dragging { transition: none; cursor: grabbing; }
   .carousel-card .c-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+    width: 68px;
+    height: 68px;
+    border-radius: 19px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
   }
-  .carousel-card .c-icon svg { width: 21px; height: 21px; }
+  .carousel-card .c-icon svg { width: 34px; height: 34px; }
   .carousel-card .c-title {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800;
-    font-size: 18px;
+    font-size: 28px;
     letter-spacing: 0.01em;
     line-height: 1.05;
   }
-  .carousel-card .c-desc { font-size: 10.5px; color: var(--text-dim); line-height: 1.3; }
+  .carousel-card .c-desc { font-size: 13.5px; color: var(--text-dim); line-height: 1.4; }
 
   .carousel-card[data-cmode="facile"] { background: linear-gradient(165deg, var(--wash-green) 0%, var(--panel) 72%); }
   .carousel-card[data-cmode="facile"] .c-icon { background: var(--green); color: #0A2016; }
@@ -1065,7 +1085,7 @@
 </div>
 
 <div class="mode-overlay" id="mode-overlay" style="display:none;">
-  <button class="overlay-back-btn" id="btn-back-mode" aria-label="Indietro">←</button>
+  <button class="overlay-back-btn" id="btn-back-mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span>Indietro</span></button>
   <div class="carousel-screen">
     <h2>Scegli la difficoltà di gioco</h2>
     <div class="carousel-viewport" id="carousel-difficulty">
@@ -1092,7 +1112,7 @@
 </div>
 
 <div class="mode-overlay" id="challenge-teamcount-overlay" style="display:none;">
-  <button class="overlay-back-btn" id="btn-back-teamcount" aria-label="Indietro">←</button>
+  <button class="overlay-back-btn" id="btn-back-teamcount"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span>Indietro</span></button>
   <div class="carousel-screen">
     <h2>In quante squadre siete?</h2>
     <div class="carousel-viewport" id="carousel-teamcount">
@@ -2027,9 +2047,9 @@
       cards.forEach(function (card, i) {
         var offset = i - activeIndex;
         var dragShift = extraPx / 2.6;
-        var x = offset * 78 + dragShift;
-        var z = -Math.abs(offset) * 110;
-        var rot = offset * -28 + extraPx / 9;
+        var x = offset * 76 + dragShift;
+        var z = -Math.abs(offset) * 170;
+        var rot = offset * -26 + extraPx / 9;
         var scale = offset === 0 ? 1 : 0.82;
         var opacity = Math.abs(offset) > 1 ? 0 : (offset === 0 ? 1 : 0.62);
         card.style.transform = 'translateX(' + x + '%) translateZ(' + z + 'px) rotateY(' + rot + 'deg) scale(' + scale + ')';
