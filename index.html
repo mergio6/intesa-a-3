@@ -3371,23 +3371,29 @@
       var j = Math.floor(Math.random() * (i + 1));
       var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
     }
-    // posizioni fisse lungo il perimetro, per lasciare libero il centro
-    // dove stanno logo, titolo e barra di caricamento
-    var slots = [
-      { left: 8,  top: 8,  size: 15 }, { left: 48, top: 5,  size: 20 }, { left: 84, top: 9,  size: 14 },
-      { left: 4,  top: 27, size: 22 }, { left: 90, top: 24, size: 17 },
-      { left: 6,  top: 68, size: 18 }, { left: 88, top: 70, size: 23 },
-      { left: 13, top: 88, size: 16 }, { left: 48, top: 92, size: 20 }, { left: 80, top: 87, size: 15 }
-    ];
-    var chosen = pool.slice(0, slots.length);
-    chosen.forEach(function (word, i) {
-      var slot = slots[i];
+    var WORD_COUNT = 16;
+    // fascia centrale stretta da evitare (dove stanno logo, titolo, barra):
+    // tutto il resto dello schermo è buono, sparso senza schema fisso
+    var EXCLUDE = { x1: 22, x2: 78, y1: 38, y2: 62 };
+    var chosen = pool.slice(0, WORD_COUNT);
+    chosen.forEach(function (word) {
+      var left, top, tries = 0;
+      do {
+        left = 2 + Math.random() * 92;
+        top = 3 + Math.random() * 90;
+        tries++;
+      } while (
+        left > EXCLUDE.x1 && left < EXCLUDE.x2 &&
+        top > EXCLUDE.y1 && top < EXCLUDE.y2 &&
+        tries < 12
+      );
       var span = document.createElement('span');
       span.className = 'splash-word';
       span.textContent = word;
-      span.style.left = slot.left + '%';
-      span.style.top = slot.top + '%';
-      span.style.fontSize = slot.size + 'px';
+      span.style.left = left + '%';
+      span.style.top = top + '%';
+      span.style.fontSize = (13 + Math.random() * 24) + 'px';
+      span.style.transform = 'rotate(' + (Math.random() * 16 - 8) + 'deg)';
       container.appendChild(span);
     });
   }
