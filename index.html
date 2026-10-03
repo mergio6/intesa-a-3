@@ -3371,30 +3371,54 @@
       var j = Math.floor(Math.random() * (i + 1));
       var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
     }
-    var WORD_COUNT = 16;
-    // fascia centrale stretta da evitare (dove stanno logo, titolo, barra):
-    // tutto il resto dello schermo è buono, sparso senza schema fisso
-    var EXCLUDE = { x1: 22, x2: 78, y1: 38, y2: 62 };
+    var W = container.clientWidth || window.innerWidth;
+    var H = container.clientHeight || window.innerHeight;
+    if (!W || !H) return;
+
+    var MARGIN = 10; // spazio minimo di rispetto attorno a ogni parola
+    var TRIES_PER_WORD = 70;
+    var WORD_COUNT = 18;
+
+    function rectsOverlap(a, b) {
+      return !(a.x2 < b.x1 || a.x1 > b.x2 || a.y2 < b.y1 || a.y1 > b.y2);
+    }
+
+    // zona centrale (logo + titolo + barra) da non toccare in nessun modo:
+    // già inserita come primo "ingombro", così le parole la evitano con lo
+    // stesso identico controllo usato tra loro
+    var placed = [{
+      x1: W * 0.20, x2: W * 0.80,
+      y1: H * 0.33, y2: H * 0.67
+    }];
+
     var chosen = pool.slice(0, WORD_COUNT);
     chosen.forEach(function (word) {
-      var left, top, tries = 0;
-      do {
-        left = 2 + Math.random() * 92;
-        top = 3 + Math.random() * 90;
-        tries++;
-      } while (
-        left > EXCLUDE.x1 && left < EXCLUDE.x2 &&
-        top > EXCLUDE.y1 && top < EXCLUDE.y2 &&
-        tries < 12
-      );
+      var fontSize = 13 + Math.random() * 24;
       var span = document.createElement('span');
       span.className = 'splash-word';
       span.textContent = word;
-      span.style.left = left + '%';
-      span.style.top = top + '%';
-      span.style.fontSize = (13 + Math.random() * 24) + 'px';
-      span.style.transform = 'rotate(' + (Math.random() * 16 - 8) + 'deg)';
+      span.style.fontSize = fontSize + 'px';
+      span.style.visibility = 'hidden';
       container.appendChild(span);
+      var w = span.offsetWidth;
+      var h = span.offsetHeight;
+
+      var found = false;
+      for (var t = 0; t < TRIES_PER_WORD; t++) {
+        var x = Math.random() * Math.max(1, W - w);
+        var y = Math.random() * Math.max(1, H - h);
+        var box = { x1: x - MARGIN, x2: x + w + MARGIN, y1: y - MARGIN, y2: y + h + MARGIN };
+        var collides = placed.some(function (p) { return rectsOverlap(box, p); });
+        if (!collides) {
+          span.style.left = x + 'px';
+          span.style.top = y + 'px';
+          span.style.visibility = 'visible';
+          placed.push(box);
+          found = true;
+          break;
+        }
+      }
+      if (!found) container.removeChild(span); // non ci stava senza toccare altro: la saltiamo
     });
   }
   setupSplashWords();
