@@ -851,9 +851,16 @@
     backdrop-filter: blur(7px);
     -webkit-backdrop-filter: blur(7px);
   }
+  /* lo sfondo sfocato copre tutto lo schermo; la carta sta sotto la barra del titolo */
+  #howto-overlay, #settings-overlay {
+    top: 0;
+    padding-top: var(--popup-top, 64px);
+  }
   .howto-card {
     max-width: 440px;
-    max-height: 88vh;
+    /* 100% dello spazio sotto la barra del titolo (non "88vh", che su smartphone include la barra
+       del browser e faceva sbordare la carta verso l'alto, sopra il titolo) */
+    max-height: 100%;
     position: relative;
     gap: 10px;
     padding: 22px 16px 16px;
@@ -896,7 +903,7 @@
   }
   .settings-card {
     max-width: 380px;
-    max-height: 88vh;
+    max-height: 100%;
     overflow-y: auto;
     gap: 10px;
     padding: 22px 16px 16px;
@@ -3995,7 +4002,11 @@
   document.getElementById('btn-howto').addEventListener('click', function () {
     playClickSound();
     settingsOverlayEl.style.display = 'none';
+    updateOverlayTopOffset(); // la scritta "Modalità" può essere comparsa/sparita: ricalcolo il margine
     howtoOverlayEl.style.display = 'flex';
+    // ogni volta che si apre, si riparte dall'inizio del testo
+    var howtoBodyEl = howtoOverlayEl.querySelector('.howto-body');
+    if (howtoBodyEl) howtoBodyEl.scrollTop = 0;
   });
   document.getElementById('btn-howto-close').addEventListener('click', function () {
     playClickSound();
@@ -4043,7 +4054,10 @@
     syncThemeUI();
     updateSyncStatusUI();
     howtoOverlayEl.style.display = 'none';
+    updateOverlayTopOffset();
     settingsOverlayEl.style.display = 'flex';
+    var settingsCardEl = settingsOverlayEl.querySelector('.settings-card');
+    if (settingsCardEl) settingsCardEl.scrollTop = 0;
     playClickSound();
   });
   document.getElementById('btn-settings-close').addEventListener('click', function () {
@@ -4209,6 +4223,11 @@
       var rect = indicator.getBoundingClientRect();
       var offset = Math.max(0, Math.round(rect.bottom + 6));
       document.documentElement.style.setProperty('--overlay-top', offset + 'px');
+      // Popup (Come si gioca? / Impostazioni): la scritta "Modalità" esiste solo in partita, quindi dai menu
+      // il margine va calcolato dalla barra del titolo, che c'è sempre.
+      var bar = document.querySelector('.topbar').getBoundingClientRect();
+      var popupTop = Math.round(Math.max(bar.bottom, rect.height ? rect.bottom : 0) + 6);
+      document.documentElement.style.setProperty('--popup-top', popupTop + 'px');
     } catch (e) { /* ignora, resta il valore di default */ }
   }
   updateOverlayTopOffset();
