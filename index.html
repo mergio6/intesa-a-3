@@ -60,6 +60,8 @@
     --chip-pass: #B8700F;
     --glow-blue-rgb: 29, 114, 224;
     --glow-orange-rgb: 242, 153, 74;
+    --switch-off: #B9C0DA;
+    --scroll-thumb: rgba(29, 114, 224, 0.30);
     --red: #E03B3B;
     --red-dark: #B92C2C;
   }
@@ -93,6 +95,8 @@
       --chip-pass: #F5CB63;
       --glow-blue-rgb: 79, 156, 255;
       --glow-orange-rgb: 255, 169, 77;
+      --switch-off: #3A4675;
+      --scroll-thumb: rgba(79, 156, 255, 0.38);
       --red: #FF5C5C;
       --red-dark: #E03B3B;
     }
@@ -126,6 +130,8 @@
     --chip-pass: #F5CB63;
     --glow-blue-rgb: 79, 156, 255;
     --glow-orange-rgb: 255, 169, 77;
+    --switch-off: #3A4675;
+    --scroll-thumb: rgba(79, 156, 255, 0.38);
     --red: #FF5C5C;
     --red-dark: #E03B3B;
   }
@@ -839,11 +845,24 @@
   .carousel-card[data-cmode="team4"] .c-icon { background: var(--orange); color: #1B1300; }
   .carousel-card[data-cmode="team4"] .c-title { color: var(--orange-dark); }
 
+  /* Come si gioca?: stessa impostazione delle Impostazioni (carta rotonda, icone colorate, sfondo sfocato) */
+  #howto-overlay {
+    background: rgba(8, 14, 26, 0.38);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+  }
   .howto-card {
-    max-width: 480px;
-    max-height: 82vh;
+    max-width: 440px;
+    max-height: 88vh;
     position: relative;
-    padding-top: 40px;
+    gap: 10px;
+    padding: 22px 16px 16px;
+    border-radius: 28px;
+    border: 1px solid var(--border);
+    background-color: var(--panel);
+    background-image: linear-gradient(180deg, var(--wash-blue) 0%, rgba(0, 0, 0, 0) 30%);
+    box-shadow: 0 28px 60px -18px rgba(0, 0, 0, 0.5);
+    animation: cardPop 0.38s cubic-bezier(.22,.85,.3,1);
   }
   .settings-btn {
     width: 36px;
@@ -869,7 +888,62 @@
     line-height: 1;
   }
 
-  .settings-card { max-width: 320px; padding-top: 40px; gap: 10px; max-height: 86vh; overflow-y: auto; }
+  /* Impostazioni: stessa impostazione dei resoconti (carta rotonda, icone colorate, sfondo sfocato) */
+  #settings-overlay {
+    background: rgba(8, 14, 26, 0.38);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+  }
+  .settings-card {
+    max-width: 380px;
+    max-height: 88vh;
+    overflow-y: auto;
+    gap: 10px;
+    padding: 22px 16px 16px;
+    border-radius: 28px;
+    border: 1px solid var(--border);
+    background-color: var(--panel);
+    background-image: linear-gradient(180deg, var(--wash-blue) 0%, rgba(0, 0, 0, 0) 36%);
+    box-shadow: 0 28px 60px -18px rgba(0, 0, 0, 0.5);
+    animation: cardPop 0.38s cubic-bezier(.22,.85,.3,1);
+  }
+  .settings-badge {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    flex: 0 0 auto;
+    box-shadow: 0 10px 22px -8px rgba(29, 114, 224, 0.7);
+  }
+  .settings-badge svg { width: 27px; height: 27px; }
+  .mode-card h2.settings-title {
+    font-family: 'Baloo 2', 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: clamp(27px, 7.5vw, 33px);
+    line-height: 1.1;
+    text-align: center;
+    color: var(--text);
+    margin: -2px 0 4px;
+  }
+  .settings-card .howto-close, .howto-card .howto-close {
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: var(--panel-2);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .settings-card .howto-close svg, .howto-card .howto-close svg { width: 16px; height: 16px; }
   .settings-subtitle {
     margin: -6px 0 2px;
     font-size: 12.5px;
@@ -881,66 +955,116 @@
     align-items: center;
     justify-content: space-between;
     background: var(--panel-2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 14px;
+    border-radius: 18px;
+    padding: 11px 12px;
   }
   .settings-row-label {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 14.5px;
-    font-weight: 700;
+    gap: 11px;
+    font-size: 15px;
+    font-weight: 800;
     color: var(--text);
   }
-  .settings-icon { display: inline-flex; color: var(--blue-dark); flex: 0 0 auto; }
+  .settings-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
   .settings-icon svg { width: 18px; height: 18px; display: block; }
-  .settings-row-col { flex-direction: column; align-items: stretch; gap: 10px; }
+  .settings-icon.ic-blue { background: var(--blue); color: #fff; }
+  .settings-icon.ic-green { background: var(--green); color: #0A2016; }
+  .settings-icon.ic-orange { background: var(--orange); color: #1B1300; }
+  .settings-icon.ic-yellow { background: #E8B93E; color: #3A2600; }
+  .settings-icon.ic-slate { background: #5B6B8C; color: #fff; }
+  .settings-row-col { flex-direction: column; align-items: stretch; gap: 12px; }
   .settings-row-head { display: flex; align-items: center; justify-content: space-between; }
-  .settings-value { font-size: 13px; font-weight: 800; color: var(--blue-dark); }
-  .settings-range { width: 100%; accent-color: var(--blue); cursor: pointer; }
+  .settings-value {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--blue-dark);
+    background: var(--wash-blue);
+    padding: 4px 11px;
+    border-radius: 999px;
+  }
+  .settings-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    outline: none;
+    cursor: pointer;
+    background: linear-gradient(to right, var(--blue) 0%, var(--blue) var(--fill, 50%), var(--switch-off) var(--fill, 50%), var(--switch-off) 100%);
+  }
+  .settings-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--blue);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+  }
+  .settings-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--blue);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+  }
+  .settings-range::-moz-range-track { background: transparent; }
   .settings-sync-btn {
     font-family: 'Manrope', sans-serif;
-    font-weight: 700;
-    font-size: 12px;
+    font-weight: 800;
+    font-size: 12.5px;
     background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 10px;
+    border: none;
+    box-shadow: inset 0 0 0 1.5px var(--border);
+    border-radius: 999px;
+    padding: 8px 14px;
     color: var(--blue-dark);
     cursor: pointer;
   }
-  .settings-sync-status { font-size: 12px; color: var(--text-dim); }
-  .settings-sync-status.ok { color: var(--green-dark); }
-  .settings-sync-status.err { color: var(--red-dark); }
+  .settings-sync-btn:active { transform: scale(0.96); }
+  .settings-sync-status { font-size: 12px; font-weight: 700; color: var(--text-dim); line-height: 1.35; }
+  .settings-sync-status.ok { color: var(--chip-green); }
+  .settings-sync-status.err { color: var(--chip-red); }
   .settings-theme-group {
     display: flex;
     gap: 4px;
     background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 3px;
+    box-shadow: inset 0 0 0 1px var(--border);
+    border-radius: 14px;
+    padding: 4px;
     width: 100%;
   }
   .settings-theme-btn {
     flex: 1 1 0;
     font-family: 'Manrope', sans-serif;
-    font-weight: 700;
-    font-size: 12.5px;
+    font-weight: 800;
+    font-size: 13px;
     background: transparent;
     border: none;
-    border-radius: 8px;
-    padding: 8px 4px;
+    border-radius: 11px;
+    padding: 10px 4px;
     color: var(--text-dim);
     cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
   }
-  .settings-theme-btn.active { background: var(--blue); color: #fff; }
-  .switch { position: relative; display: inline-block; width: 46px; height: 26px; flex: 0 0 auto; }
+  .settings-theme-btn.active { background: var(--blue); color: #fff; box-shadow: 0 6px 14px -6px rgba(29, 114, 224, 0.75); }
+  .switch { position: relative; display: inline-block; width: 52px; height: 30px; flex: 0 0 auto; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .switch-slider {
     position: absolute;
     inset: 0;
-    background: var(--border);
+    background: var(--switch-off);
     border-radius: 999px;
     cursor: pointer;
     transition: background 0.2s ease;
@@ -948,17 +1072,17 @@
   .switch-slider::before {
     content: "";
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     left: 3px;
     top: 3px;
     background: #fff;
     border-radius: 50%;
     transition: transform 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   }
-  .switch input:checked + .switch-slider { background: var(--blue); }
-  .switch input:checked + .switch-slider::before { transform: translateX(20px); }
+  .switch input:checked + .switch-slider { background: var(--green); }
+  .switch input:checked + .switch-slider::before { transform: translateX(22px); }
 
   .howto-close {
     position: absolute;
@@ -988,6 +1112,40 @@
   }
   .howto-body p:last-child { margin-bottom: 0; }
   .howto-body strong { color: var(--blue-dark); }
+  .howto-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 6px 2px 8px 0;
+    /* dissolvenza in alto e in basso: il testo che scorre non viene tagliato di netto */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  }
+  .howto-section { background: var(--panel-2); border-radius: 18px; padding: 12px 14px 14px; }
+  .howto-section-head { display: flex; align-items: center; gap: 11px; margin-bottom: 9px; }
+  .howto-section-head h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.25; }
+  .howto-section p { margin: 0; }
+  .settings-icon.ic-red { background: var(--red); color: #fff; }
+
+  /* Barre di scorrimento (si vedono da computer): sottili, arrotondate e nei colori dell'app,
+     invece di quella grigia standard del browser, che stonava soprattutto nel tema chiaro. */
+  .howto-body, .settings-card, .endgame-card, .results-card, .endgame-words {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb) transparent;
+  }
+  .howto-body::-webkit-scrollbar, .settings-card::-webkit-scrollbar, .endgame-card::-webkit-scrollbar,
+  .results-card::-webkit-scrollbar, .endgame-words::-webkit-scrollbar { width: 10px; }
+  .howto-body::-webkit-scrollbar-track, .settings-card::-webkit-scrollbar-track, .endgame-card::-webkit-scrollbar-track,
+  .results-card::-webkit-scrollbar-track, .endgame-words::-webkit-scrollbar-track { background: transparent; }
+  .howto-body::-webkit-scrollbar-thumb, .settings-card::-webkit-scrollbar-thumb, .endgame-card::-webkit-scrollbar-thumb,
+  .results-card::-webkit-scrollbar-thumb, .endgame-words::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+  }
+  .howto-body::-webkit-scrollbar-button, .settings-card::-webkit-scrollbar-button, .endgame-card::-webkit-scrollbar-button,
+  .results-card::-webkit-scrollbar-button, .endgame-words::-webkit-scrollbar-button { display: none; }
 
   .answer-timer {
     margin-top: 8px;
@@ -1563,25 +1721,45 @@
 
 <div class="mode-overlay" id="howto-overlay" style="display:none; z-index: 55;">
   <div class="mode-card howto-card">
-    <button class="howto-close" id="btn-howto-close" aria-label="Chiudi">✕</button>
-    <h2>Come si gioca</h2>
+    <button class="howto-close" id="btn-howto-close" aria-label="Chiudi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    <div class="settings-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.5-2.8 4.2"/><path d="M12 17.6h.01"/></svg></div>
+    <h2 class="settings-title">Come si gioca?</h2>
     <div class="howto-body">
-      <p><strong>Scopo del gioco.</strong> Due giocatori guardano lo schermo, dove appare una parola (o, nel raddoppio, due o più parole insieme). Un terzo giocatore, che non vede lo schermo, deve indovinarla.</p>
-      <p><strong>Come si danno gli indizi?</strong> I due giocatori che vedono la parola si alternano dicendo una parola a testa, costruendo insieme una domanda di senso compiuto che aiuti il terzo giocatore a indovinare. Non si può dire la parola misteriosa né una sua parte <em>(esempio di parola: Boscaiolo. Domanda corretta: "Chi taglia alberi foresta?". Domanda sbagliata: "Chi taglia alberi <u>bosco</u>?")</em>.</p>
-      <p><strong>Durata partita.</strong> Ogni manche ha una durata di 60 secondi. I tasti "Nuova parola" e "Raddoppio" fanno comparire la parola e avviano il conto alla rovescia. Quando il terzo giocatore alza la mano per tentare la risposta, si preme STOP per fermare il tempo. Il terzo giocatore ha 3 secondi di tempo per tentare la risposta, altrimenti la mancata risposta corrisponde a un errore. Quando i 60 secondi terminano, i due giocatori devono fermarsi immediatamente, ma il terzo giocatore può comunque tentare la risposta se pensa di aver ricevuto abbastanza indizi.</p>
-      <p><strong>Punteggio.</strong> Indovinare la parola misteriosa garantisce un +1 in caso di risposta corretta o un −1 in caso di risposta sbagliata. Se i due giocatori sono in difficoltà possono anche passare la parola (fino a 3 volte a partita) senza guadagnare né perdere punti. Il passo <u>non</u> può essere utilizzato dal giocatore che indovina la parola.</p>
-      <p><strong>Raddoppio.</strong> Se il punteggio della squadra è di almeno 2 punti, i tre giocatori possono accordarsi sul tentare un raddoppio. La posta in palio aumenta, garantendo +2 punti in caso di successo o −2 in caso il terzo giocatore dovesse sbagliare. Si hanno 2 raddoppi a disposizione per ogni partita. Il passo è utilizzabile anche con i raddoppi.</p>
-      <p><strong>Modalità di gioco.</strong> È possibile giocare in <em>"Modalità Allenamento"</em> per allenarsi con i propri amici scegliendo la difficoltà delle parole:<br><em>Primo incontro</em>: le parole proposte richiedono una formulazione semplice della domanda.<br><em>Telepatia</em>: le parole proposte sono più complesse e richiedono una formulazione più precisa e articolata della domanda.<br><em>Intesa a tre</em>: la più equilibrata, con parole sia facili che difficili e un bilanciamento generale che rende l'allenamento piacevole e sfidante per qualsiasi gruppo di gioco.<br>La <em>"Modalità Sfida"</em> è pensata per sfidarsi tra gruppi di gioco con la difficoltà <em>Intesa a tre</em>. Si possono sfidare tra loro fino a 4 squadre. In caso di parità finale, per decretare il vincitore si procederà a uno spareggio nel quale bisognerà indovinare una parola nel minor numero di secondi possibile.</p>
+      <section class="howto-section">
+        <div class="howto-section-head"><span class="settings-icon ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg></span><h3>Scopo del gioco</h3></div>
+        <p>Due giocatori guardano lo schermo, dove appare una parola (o, nel raddoppio, due o più parole insieme). Un terzo giocatore, che non vede lo schermo, deve indovinarla.</p>
+      </section>
+      <section class="howto-section">
+        <div class="howto-section-head"><span class="settings-icon ic-slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span><h3>Come si danno gli indizi?</h3></div>
+        <p>I due giocatori che vedono la parola si alternano dicendo una parola a testa, costruendo insieme una domanda di senso compiuto che aiuti il terzo giocatore a indovinare. Non si può dire la parola misteriosa né una sua parte <em>(esempio di parola: Boscaiolo. Domanda corretta: "Chi taglia alberi foresta?". Domanda sbagliata: "Chi taglia alberi <u>bosco</u>?")</em>.</p>
+      </section>
+      <section class="howto-section">
+        <div class="howto-section-head"><span class="settings-icon ic-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 1.5"/><path d="M9.5 2.5h5"/><path d="M12 2.5V6"/></svg></span><h3>Durata partita</h3></div>
+        <p>Ogni manche ha una durata di 60 secondi. I tasti "Nuova parola" e "Raddoppio" fanno comparire la parola e avviano il conto alla rovescia. Quando il terzo giocatore alza la mano per tentare la risposta, si preme STOP per fermare il tempo. Il terzo giocatore ha 3 secondi di tempo per tentare la risposta, altrimenti la mancata risposta corrisponde a un errore. Quando i 60 secondi terminano, i due giocatori devono fermarsi immediatamente, ma il terzo giocatore può comunque tentare la risposta se pensa di aver ricevuto abbastanza indizi.</p>
+      </section>
+      <section class="howto-section">
+        <div class="howto-section-head"><span class="settings-icon ic-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span><h3>Punteggio</h3></div>
+        <p>Indovinare la parola misteriosa garantisce un +1 in caso di risposta corretta o un −1 in caso di risposta sbagliata. Se i due giocatori sono in difficoltà possono anche passare la parola (fino a 3 volte a partita) senza guadagnare né perdere punti. Il passo <u>non</u> può essere utilizzato dal giocatore che indovina la parola.</p>
+      </section>
+      <section class="howto-section">
+        <div class="howto-section-head"><span class="settings-icon ic-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span><h3>Raddoppio</h3></div>
+        <p>Se il punteggio della squadra è di almeno 2 punti, i tre giocatori possono accordarsi sul tentare un raddoppio. La posta in palio aumenta, garantendo +2 punti in caso di successo o −2 in caso il terzo giocatore dovesse sbagliare. Si hanno 2 raddoppi a disposizione per ogni partita. Il passo è utilizzabile anche con i raddoppi.</p>
+      </section>
+      <section class="howto-section">
+        <div class="howto-section-head"><span class="settings-icon ic-yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a2 2 0 0 0 0 4h1"/><path d="M17 6h3a2 2 0 0 1 0 4h-1"/></svg></span><h3>Modalità di gioco</h3></div>
+        <p>È possibile giocare in <em>"Modalità Allenamento"</em> per allenarsi con i propri amici oppure in <em>"Modalità Sfida"</em> per competere con altre squadre con la difficoltà di gioco <em>Intesa a tre</em>. In caso di parità finale, per decretare il vincitore si procederà a uno spareggio nel quale bisognerà indovinare una parola nel minor numero di secondi possibile.</p>
+      </section>
     </div>
   </div>
 </div>
 
 <div class="mode-overlay" id="settings-overlay" style="display:none; z-index: 56;">
   <div class="mode-card settings-card">
-    <button class="howto-close" id="btn-settings-close" aria-label="Chiudi">✕</button>
-    <h2>Impostazioni</h2>
+    <button class="howto-close" id="btn-settings-close" aria-label="Chiudi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    <div class="settings-badge"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Zm8.9 2.1-1.5-.5a7.3 7.3 0 0 0-.6-1.5l.8-1.4a1 1 0 0 0-.1-1.2l-1.1-1.1a1 1 0 0 0-1.2-.1l-1.4.8a7.3 7.3 0 0 0-1.5-.6l-.5-1.5a1 1 0 0 0-1-.7h-1.6a1 1 0 0 0-1 .7l-.5 1.5c-.5.1-1 .3-1.5.6l-1.4-.8a1 1 0 0 0-1.2.1L4.5 6.1a1 1 0 0 0-.1 1.2l.8 1.4c-.3.5-.5 1-.6 1.5l-1.5.5a1 1 0 0 0-.7 1v1.6a1 1 0 0 0 .7 1l1.5.5c.1.5.3 1 .6 1.5l-.8 1.4a1 1 0 0 0 .1 1.2l1.1 1.1a1 1 0 0 0 1.2.1l1.4-.8c.5.3 1 .5 1.5.6l.5 1.5a1 1 0 0 0 1 .7h1.6a1 1 0 0 0 1-.7l.5-1.5c.5-.1 1-.3 1.5-.6l1.4.8a1 1 0 0 0 1.2-.1l1.1-1.1a1 1 0 0 0 .1-1.2l-.8-1.4c.3-.5.5-1 .6-1.5l1.5-.5a1 1 0 0 0 .7-1v-1.6a1 1 0 0 0-.7-1Z"/></svg></div>
+    <h2 class="settings-title">Impostazioni</h2>
     <div class="settings-row settings-row-col">
-      <div class="settings-row-label"><span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></svg></span><span>Tema</span></div>
+      <div class="settings-row-label"><span class="settings-icon ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></svg></span><span>Tema</span></div>
       <div class="settings-theme-group" id="settings-theme-group">
         <button type="button" class="settings-theme-btn" data-theme-choice="system">Sistema</button>
         <button type="button" class="settings-theme-btn" data-theme-choice="light">Chiaro</button>
@@ -1589,14 +1767,14 @@
       </div>
     </div>
     <div class="settings-row">
-      <div class="settings-row-label"><span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M19.6 5.5a9 9 0 0 1 0 13"/></svg></span><span>Audio</span></div>
+      <div class="settings-row-label"><span class="settings-icon ic-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M19.6 5.5a9 9 0 0 1 0 13"/></svg></span><span>Audio</span></div>
       <label class="switch">
         <input type="checkbox" id="settings-audio-toggle" checked>
         <span class="switch-slider"></span>
       </label>
     </div>
     <div class="settings-row">
-      <div class="settings-row-label"><span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="4" width="8" height="16" rx="2"/><path d="M3 10v4"/><path d="M21 10v4"/></svg></span><span>Vibrazione</span></div>
+      <div class="settings-row-label"><span class="settings-icon ic-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="4" width="8" height="16" rx="2"/><path d="M3 10v4"/><path d="M21 10v4"/></svg></span><span>Vibrazione</span></div>
       <label class="switch">
         <input type="checkbox" id="settings-vibration-toggle" checked>
         <span class="switch-slider"></span>
@@ -1604,14 +1782,14 @@
     </div>
     <div class="settings-row settings-row-col">
       <div class="settings-row-head">
-        <div class="settings-row-label"><span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17 7 6l4 11"/><path d="M4.2 13.5h5.6"/><path d="M14 17l3-7 3 7"/><path d="M14.8 15h4.4"/></svg></span><span>Dimensione testo</span></div>
+        <div class="settings-row-label"><span class="settings-icon ic-yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17 7 6l4 11"/><path d="M4.2 13.5h5.6"/><path d="M14 17l3-7 3 7"/><path d="M14.8 15h4.4"/></svg></span><span>Dimensione testo</span></div>
         <span class="settings-value" id="settings-textsize-value">100%</span>
       </div>
       <input type="range" class="settings-range" id="settings-textsize" min="85" max="135" step="5" value="100">
     </div>
     <div class="settings-row settings-row-col">
       <div class="settings-row-head">
-        <div class="settings-row-label"><span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></span><span>Parole</span></div>
+        <div class="settings-row-label"><span class="settings-icon ic-slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></span><span>Parole</span></div>
         <button type="button" class="settings-sync-btn" id="btn-sync-now">Sincronizza ora</button>
       </div>
       <span class="settings-sync-status" id="settings-sync-status">—</span>
@@ -2868,6 +3046,10 @@
     enterGameplay();
     setActiveMode(null);
     clearWord('Premi «Parola per lo spareggio» per iniziare');
+    // Il timer dello spareggio parte da 0 e deve essere bianco: senza questo restava il
+    // "0" arancione dell'ultima squadra che aveva giocato (fine tempo = colore "low").
+    timerValueEl.classList.remove('low');
+    timerValueEl.textContent = '0';
     showIdleRow();
     enterPlayPhase();
     var firstName = challengeTeams[teamIndices[0]].name;
@@ -3828,10 +4010,16 @@
   var textSizeValueEl = document.getElementById('settings-textsize-value');
   var themeButtons = document.querySelectorAll('#settings-theme-group [data-theme-choice]');
 
+  // la parte piena della barra dello slider segue il valore
+  function updateRangeFill() {
+    var min = parseFloat(textSizeEl.min), max = parseFloat(textSizeEl.max);
+    textSizeEl.style.setProperty('--fill', ((parseFloat(textSizeEl.value) - min) / (max - min) * 100) + '%');
+  }
   function syncTextSizeUI() {
     var pct = Math.round(appSettings.textScale * 100);
     textSizeEl.value = pct;
     textSizeValueEl.textContent = pct + '%';
+    updateRangeFill();
   }
   function syncThemeUI() {
     themeButtons.forEach(function (btn) {
@@ -3879,6 +4067,7 @@
   textSizeEl.addEventListener('input', function () {
     appSettings.textScale = parseInt(textSizeEl.value, 10) / 100;
     textSizeValueEl.textContent = textSizeEl.value + '%';
+    updateRangeFill();
     applyTextScale();
     saveSettings();
   });
