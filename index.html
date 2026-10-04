@@ -55,6 +55,9 @@
     --wash-green: rgba(47, 174, 96, 0.10);
     --wash-orange: rgba(242, 153, 74, 0.12);
     --wash-red: rgba(224, 59, 59, 0.10);
+    --chip-green: #1F8E4C;
+    --chip-red: #B92C2C;
+    --chip-pass: #B8700F;
     --red: #E03B3B;
     --red-dark: #B92C2C;
   }
@@ -83,6 +86,9 @@
       --wash-green: rgba(63, 208, 122, 0.26);
       --wash-orange: rgba(255, 169, 77, 0.26);
       --wash-red: rgba(255, 92, 92, 0.26);
+      --chip-green: #4BE08A;
+      --chip-red: #FF8080;
+      --chip-pass: #F5CB63;
       --red: #FF5C5C;
       --red-dark: #E03B3B;
     }
@@ -111,6 +117,9 @@
     --wash-green: rgba(63, 208, 122, 0.26);
     --wash-orange: rgba(255, 169, 77, 0.26);
     --wash-red: rgba(255, 92, 92, 0.26);
+    --chip-green: #4BE08A;
+    --chip-red: #FF8080;
+    --chip-pass: #F5CB63;
     --red: #FF5C5C;
     --red-dark: #E03B3B;
   }
@@ -1014,57 +1023,130 @@
   }
   .answer-timer[hidden] { display: none; }
 
-  .endgame-card {
+  @keyframes cardPop {
+    from { opacity: 0; transform: translateY(16px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .endgame-card, .results-card {
     max-width: 380px;
-    max-height: 86vh;
+    max-height: 88vh;
     align-items: center;
     text-align: center;
     overflow-y: auto;
+    gap: 14px;
+    padding: 22px 18px 18px;
+    border-radius: 28px;
+    border: 1px solid var(--border);
+    box-shadow: 0 28px 60px -18px rgba(0, 0, 0, 0.5);
+    animation: cardPop 0.38s cubic-bezier(.22,.85,.3,1);
+  }
+  .endgame-card { background-color: var(--panel); background-image: linear-gradient(180deg, var(--wash-green) 0%, rgba(0, 0, 0, 0) 40%); }
+  .results-card { background-color: var(--panel); background-image: linear-gradient(180deg, rgba(232, 185, 62, 0.22) 0%, rgba(0, 0, 0, 0) 40%); }
+
+  .endgame-badge {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--green);
+    color: #0A2016;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    box-shadow: 0 10px 22px -8px rgba(47, 174, 96, 0.7);
+  }
+  .endgame-badge.gold {
+    background: #E8B93E;
+    color: #3A2600;
+    box-shadow: 0 10px 22px -8px rgba(232, 185, 62, 0.75);
+  }
+  .endgame-badge svg { width: 27px; height: 27px; }
+
+  .endgame-team-label {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    font-size: clamp(20px, 6vw, 25px);
+    color: var(--orange-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: rgba(242, 153, 74, 0.18);
+    padding: 3px 18px;
+    border-radius: 999px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .endgame-team-label[hidden] { display: none; }
+
+  .endgame-score-block {
+    width: 100%;
+    background: var(--green);
+    color: #0A2016;
+    border-radius: 22px;
+    padding: 12px 16px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 12px 26px -10px rgba(47, 174, 96, 0.65);
   }
   .endgame-score-label {
     font-size: 13px;
     font-weight: 800;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    color: rgba(10, 32, 22, 0.72);
   }
   .endgame-score-value {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800;
-    font-size: clamp(48px, 16vw, 72px);
-    color: var(--green-dark);
+    font-size: clamp(54px, 18vw, 76px);
+    color: #0A2016;
     line-height: 1;
-    margin-bottom: 4px;
   }
+
   .endgame-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
     width: 100%;
-    margin: 4px 0 6px;
   }
   .endgame-stat {
     background: var(--panel-2);
-    border-radius: 10px;
-    padding: 10px 6px;
+    border-radius: 16px;
+    padding: 10px 10px;
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: 9px;
+    text-align: left;
   }
-  .endgame-stat-label { font-size: 10.5px; font-weight: 700; color: var(--text-dim); }
+  .endgame-stat-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+  .endgame-stat-icon svg { width: 17px; height: 17px; }
+  .endgame-stat.is-correct .endgame-stat-icon { background: var(--green); color: #0A2016; }
+  .endgame-stat.is-wrong .endgame-stat-icon { background: var(--red); color: #fff; }
+  .endgame-stat.is-passo .endgame-stat-icon { background: #E8B93E; color: #3A2600; }
+  .endgame-stat.is-time .endgame-stat-icon { background: var(--blue); color: #fff; }
+  .endgame-stat-text { display: flex; flex-direction: column; min-width: 0; }
   .endgame-stat-value {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800;
-    font-size: 20px;
+    font-size: 24px;
+    line-height: 1.05;
     color: var(--text);
   }
+  .endgame-stat-label { font-size: 10.5px; font-weight: 700; color: var(--text-dim); line-height: 1.25; }
+
   .endgame-words-label {
-    font-size: 10.5px;
+    font-size: 12px;
     font-weight: 800;
     color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-top: 4px;
+    margin-bottom: -6px;
   }
   .endgame-words-label[hidden] { display: none; }
   .endgame-words {
@@ -1073,42 +1155,31 @@
     justify-content: center;
     gap: 6px;
     width: 100%;
-    max-height: 130px;
+    max-height: 124px;
     overflow-y: auto;
-    margin: 6px 0 4px;
-    padding: 2px;
+    padding: 10px;
+    background: var(--panel-2);
+    border-radius: 16px;
   }
   .endgame-words[hidden] { display: none; }
   .endgame-word-chip {
     font-size: 11.5px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.01em;
     padding: 4px 10px;
     border-radius: 999px;
     white-space: nowrap;
   }
-  .endgame-word-chip.correct { background: var(--green); color: #0A2016; }
-  .endgame-word-chip.wrong { background: var(--red); color: #fff; }
-  .endgame-word-chip.passed { background: #E8B93E; color: #3A2600; }
-
-  .endgame-team-label {
-    font-family: 'Big Shoulders Display', sans-serif;
-    font-weight: 800;
-    font-size: clamp(20px, 6vw, 26px);
-    color: var(--orange-dark);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    margin-bottom: 2px;
-  }
-  .endgame-team-label[hidden] { display: none; }
+  .endgame-word-chip.correct { background: rgba(47, 174, 96, 0.2); color: var(--chip-green); box-shadow: inset 0 0 0 1px rgba(47, 174, 96, 0.4); }
+  .endgame-word-chip.wrong { background: rgba(224, 59, 59, 0.16); color: var(--chip-red); box-shadow: inset 0 0 0 1px rgba(224, 59, 59, 0.4); }
+  .endgame-word-chip.passed { background: rgba(232, 185, 62, 0.26); color: var(--chip-pass); box-shadow: inset 0 0 0 1px rgba(232, 185, 62, 0.55); }
 
   .endgame-actions {
     display: flex;
     flex-direction: column;
     gap: 8px;
     width: 100%;
-    margin-top: 4px;
   }
   .endgame-actions .btn-grid.cols-2 { width: 100%; }
 
@@ -1182,42 +1253,75 @@
   }
   .names-confirm-btn:active { transform: scale(0.97); }
 
-  .results-card { max-width: 380px; }
+  .results-title {
+    font-family: 'Baloo 2', 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: clamp(25px, 7vw, 31px);
+    line-height: 1.1;
+    color: var(--text);
+    margin: -2px 0 0;
+  }
   .results-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
     width: 100%;
-    margin: 6px 0 4px;
   }
   .results-row {
     display: grid;
-    grid-template-columns: 26px 1fr 34px auto;
+    grid-template-columns: 34px 1fr auto;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     background: var(--panel-2);
-    border-radius: 10px;
-    padding: 9px 12px;
+    border-radius: 18px;
+    padding: 10px 14px 10px 10px;
+    text-align: left;
   }
-  .results-medal { font-size: 18px; text-align: center; }
+  .results-rank {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    font-size: 19px;
+    background: var(--panel);
+    color: var(--text-dim);
+    box-shadow: inset 0 0 0 1.5px var(--border);
+  }
+  .results-info { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
   .results-name {
     font-weight: 800;
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--text);
     text-transform: uppercase;
-    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .results-avg { font-size: 11px; color: var(--text-dim); font-weight: 700; white-space: nowrap; }
   .results-score {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800;
-    font-size: 20px;
-    color: var(--green-dark);
+    font-size: 26px;
+    line-height: 1;
+    color: var(--chip-green);
     text-align: right;
   }
-  .results-avg { font-size: 11px; color: var(--text-dim); font-weight: 700; white-space: nowrap; margin-left: 10px; }
+  .results-row.rank-1 {
+    background: linear-gradient(135deg, rgba(232, 185, 62, 0.34) 0%, var(--panel-2) 78%);
+    box-shadow: inset 0 0 0 1.5px rgba(232, 185, 62, 0.65), 0 10px 22px -12px rgba(232, 185, 62, 0.8);
+    padding-top: 13px;
+    padding-bottom: 13px;
+  }
+  .results-row.rank-1 .results-rank { background: #E8B93E; color: #3A2600; box-shadow: none; width: 40px; height: 40px; font-size: 22px; margin: -3px 0 -3px -3px; }
+  .results-row.rank-1 { grid-template-columns: 40px 1fr auto; }
+  .results-row.rank-1 .results-name { font-size: 15.5px; }
+  .results-row.rank-1 .results-score { font-size: 34px; }
+  .results-row.rank-2 .results-rank { background: #B9C4D0; color: #243040; box-shadow: none; }
+  .results-row.rank-3 .results-rank { background: #CF8F62; color: #3A1D08; box-shadow: none; }
 </style>
 </head>
 <body>
@@ -1390,7 +1494,8 @@
 
 <div class="mode-overlay" id="challenge-results-overlay" style="display:none; z-index: 53;">
   <div class="mode-card results-card">
-    <h2>Risultati finali</h2>
+    <div class="endgame-badge gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a2 2 0 0 0 0 4h1"/><path d="M17 6h3a2 2 0 0 1 0 4h-1"/></svg></div>
+    <h2 class="results-title">Risultati finali</h2>
     <div class="results-list" id="results-list"></div>
     <div class="btn-grid cols-2" style="width:100%; margin-top:8px;">
       <button class="mode-btn howto" id="btn-results-menu">Torna al<br>menu iniziale</button>
@@ -1469,25 +1574,28 @@
 
 <div class="mode-overlay" id="endgame-overlay" style="display:none; z-index: 52;">
   <div class="mode-card endgame-card">
+    <div class="endgame-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a2 2 0 0 0 0 4h1"/><path d="M17 6h3a2 2 0 0 1 0 4h-1"/></svg></div>
     <div class="endgame-team-label" id="endgame-team-label" hidden></div>
-    <div class="endgame-score-label">Punteggio finale</div>
-    <div class="endgame-score-value" id="endgame-score">0</div>
+    <div class="endgame-score-block">
+      <div class="endgame-score-label">Punteggio finale</div>
+      <div class="endgame-score-value" id="endgame-score">0</div>
+    </div>
     <div class="endgame-stats">
-      <div class="endgame-stat">
-        <span class="endgame-stat-label">Tempo medio a parola</span>
-        <span class="endgame-stat-value" id="endgame-avg-time">—</span>
+      <div class="endgame-stat is-correct">
+        <span class="endgame-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <span class="endgame-stat-text"><span class="endgame-stat-value" id="endgame-correct">0</span><span class="endgame-stat-label">Parole indovinate</span></span>
       </div>
-      <div class="endgame-stat">
-        <span class="endgame-stat-label">Parole indovinate</span>
-        <span class="endgame-stat-value" id="endgame-correct">0</span>
+      <div class="endgame-stat is-wrong">
+        <span class="endgame-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
+        <span class="endgame-stat-text"><span class="endgame-stat-value" id="endgame-wrong">0</span><span class="endgame-stat-label">Parole sbagliate</span></span>
       </div>
-      <div class="endgame-stat">
-        <span class="endgame-stat-label">Parole sbagliate</span>
-        <span class="endgame-stat-value" id="endgame-wrong">0</span>
+      <div class="endgame-stat is-passo">
+        <span class="endgame-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+        <span class="endgame-stat-text"><span class="endgame-stat-value" id="endgame-passi">0</span><span class="endgame-stat-label">Passo utilizzati</span></span>
       </div>
-      <div class="endgame-stat">
-        <span class="endgame-stat-label">Passo utilizzati</span>
-        <span class="endgame-stat-value" id="endgame-passi">0</span>
+      <div class="endgame-stat is-time">
+        <span class="endgame-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span>
+        <span class="endgame-stat-text"><span class="endgame-stat-value" id="endgame-avg-time">—</span><span class="endgame-stat-label">Tempo medio a parola</span></span>
       </div>
     </div>
     <div class="endgame-words-label" id="endgame-words-label" hidden>Parole della partita</div>
@@ -2763,13 +2871,15 @@
     wrap.innerHTML = '';
     sorted.forEach(function (team, i) {
       var row = document.createElement('div');
-      row.className = 'results-row';
-      var medal = document.createElement('span'); medal.className = 'results-medal'; medal.textContent = medalForRank(i, sorted.length);
+      row.className = 'results-row rank-' + (i + 1);
+      var rank = document.createElement('span'); rank.className = 'results-rank'; rank.textContent = i + 1;
+      var info = document.createElement('div'); info.className = 'results-info';
       var name = document.createElement('span'); name.className = 'results-name'; name.textContent = team.name;
-      var sc = document.createElement('span'); sc.className = 'results-score'; sc.textContent = team.score;
       var avg = document.createElement('span'); avg.className = 'results-avg';
       avg.textContent = team.avgTime === null ? '—' : (team.avgTime.toFixed(1).replace('.', ',') + ' s/parola');
-      row.appendChild(medal); row.appendChild(name); row.appendChild(sc); row.appendChild(avg);
+      info.appendChild(name); info.appendChild(avg);
+      var sc = document.createElement('span'); sc.className = 'results-score'; sc.textContent = team.score;
+      row.appendChild(rank); row.appendChild(info); row.appendChild(sc);
       wrap.appendChild(row);
     });
   }
@@ -3108,9 +3218,23 @@
     }
   }
 
+  // Il punteggio finale "sale" fino al valore, per dare un po' di soddisfazione.
+  function animateCount(el, to) {
+    if (!to || to < 0) { el.textContent = to || 0; return; }
+    var startTs = null, dur = 700;
+    el.textContent = 0;
+    function step(ts) {
+      if (startTs === null) startTs = ts;
+      var p = Math.min(1, (ts - startTs) / dur);
+      el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
   function showEndGameScreen() {
     var avg = wordTimes.length ? (wordTimes.reduce(function (a, b) { return a + b; }, 0) / wordTimes.length) : null;
-    document.getElementById('endgame-score').textContent = score;
+    animateCount(document.getElementById('endgame-score'), score);
     document.getElementById('endgame-avg-time').textContent = avg === null ? '—' : avg.toFixed(1).replace('.', ',') + ' s';
     document.getElementById('endgame-correct').textContent = wordsCorrectCount;
     document.getElementById('endgame-wrong').textContent = wordsWrongCount;
