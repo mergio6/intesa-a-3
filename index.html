@@ -58,6 +58,8 @@
     --chip-green: #1F8E4C;
     --chip-red: #B92C2C;
     --chip-pass: #B8700F;
+    --glow-blue-rgb: 29, 114, 224;
+    --glow-orange-rgb: 242, 153, 74;
     --red: #E03B3B;
     --red-dark: #B92C2C;
   }
@@ -89,6 +91,8 @@
       --chip-green: #4BE08A;
       --chip-red: #FF8080;
       --chip-pass: #F5CB63;
+      --glow-blue-rgb: 79, 156, 255;
+      --glow-orange-rgb: 255, 169, 77;
       --red: #FF5C5C;
       --red-dark: #E03B3B;
     }
@@ -120,6 +124,8 @@
     --chip-green: #4BE08A;
     --chip-red: #FF8080;
     --chip-pass: #F5CB63;
+    --glow-blue-rgb: 79, 156, 255;
+    --glow-orange-rgb: 255, 169, 77;
     --red: #FF5C5C;
     --red-dark: #E03B3B;
   }
@@ -603,21 +609,20 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(120% 90% at 50% -10%, var(--bg-glow) 0%, var(--bg) 55%);
+    /* Due luci morbide (blu in alto a sinistra, arancio in basso a destra): ellissi molto larghe che si
+       dissolvono con tante tappe intermedie, così non si legge nessun cerchio né contorno. */
+    background:
+      radial-gradient(ellipse 150% 62% at -12% 27%,
+        rgba(var(--glow-blue-rgb), 0.2) 0%, rgba(var(--glow-blue-rgb), 0.165) 14%, rgba(var(--glow-blue-rgb), 0.117) 28%,
+        rgba(var(--glow-blue-rgb), 0.074) 42%, rgba(var(--glow-blue-rgb), 0.043) 56%, rgba(var(--glow-blue-rgb), 0.02) 70%,
+        rgba(var(--glow-blue-rgb), 0.006) 84%, rgba(var(--glow-blue-rgb), 0) 100%),
+      radial-gradient(ellipse 140% 58% at 112% 100%,
+        rgba(var(--glow-orange-rgb), 0.24) 0%, rgba(var(--glow-orange-rgb), 0.19) 14%, rgba(var(--glow-orange-rgb), 0.135) 28%,
+        rgba(var(--glow-orange-rgb), 0.085) 42%, rgba(var(--glow-orange-rgb), 0.05) 56%, rgba(var(--glow-orange-rgb), 0.024) 70%,
+        rgba(var(--glow-orange-rgb), 0.007) 84%, rgba(var(--glow-orange-rgb), 0) 100%),
+      radial-gradient(120% 90% at 50% -10%, var(--bg-glow) 0%, var(--bg) 55%);
     z-index: 49;
     overflow: hidden;
-    pointer-events: none;
-  }
-  #menu-backdrop::before, #menu-backdrop::after {
-    content: '';
-    position: absolute;
-    width: 62vw;
-    height: 62vw;
-    max-width: 440px;
-    max-height: 440px;
-    border-radius: 50%;
-    filter: blur(70px);
-    z-index: 0;
     pointer-events: none;
   }
   .floating-words {
@@ -643,18 +648,6 @@
   @keyframes floatWordUp {
     0% { transform: translateY(0) translateX(0); }
     100% { transform: translateY(-115vh) translateX(var(--word-drift, 0px)); }
-  }
-  #menu-backdrop::before {
-    top: 6%;
-    left: -18%;
-    background: var(--blue);
-    opacity: 0.18;
-  }
-  #menu-backdrop::after {
-    bottom: -16%;
-    right: -18%;
-    background: var(--orange);
-    opacity: 0.18;
   }
   .mode-card {
     background: var(--panel);
