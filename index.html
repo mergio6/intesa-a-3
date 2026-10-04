@@ -728,6 +728,10 @@
     text-align: center;
     color: var(--text);
   }
+  .mode-card h2.confirm-title {
+    font-size: clamp(14px, 4.3vw, 17px);
+    white-space: nowrap;
+  }
   button.mode-btn {
     font-family: 'Manrope', sans-serif;
     font-weight: 800;
@@ -818,9 +822,15 @@
   .carousel-card[data-cmode="sfida"] { background: linear-gradient(165deg, var(--wash-orange) 0%, var(--panel) 72%); }
   .carousel-card[data-cmode="sfida"] .c-icon { background: var(--orange); color: #1B1300; }
   .carousel-card[data-cmode="sfida"] .c-title { color: var(--orange-dark); }
-  .carousel-card[data-cmode^="team"] { background: linear-gradient(165deg, var(--wash-blue) 0%, var(--panel) 72%); }
-  .carousel-card[data-cmode^="team"] .c-icon { background: var(--blue); color: #fff; }
-  .carousel-card[data-cmode^="team"] .c-title { color: var(--blue); }
+  .carousel-card[data-cmode="team2"] { background: linear-gradient(165deg, var(--wash-blue) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="team2"] .c-icon { background: var(--blue); color: #fff; }
+  .carousel-card[data-cmode="team2"] .c-title { color: var(--blue); }
+  .carousel-card[data-cmode="team3"] { background: linear-gradient(165deg, var(--wash-green) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="team3"] .c-icon { background: var(--green); color: #0A2016; }
+  .carousel-card[data-cmode="team3"] .c-title { color: var(--green); }
+  .carousel-card[data-cmode="team4"] { background: linear-gradient(165deg, var(--wash-orange) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="team4"] .c-icon { background: var(--orange); color: #1B1300; }
+  .carousel-card[data-cmode="team4"] .c-title { color: var(--orange-dark); }
 
   .howto-card {
     max-width: 480px;
@@ -1350,19 +1360,16 @@
     <div class="carousel-viewport" id="carousel-teamcount">
       <div class="carousel-track" id="carousel-teamcount-track">
         <div class="carousel-card" data-cmode="team2">
-          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <div class="c-title">2</div>
-          <div class="c-desc">squadre</div>
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+          <div class="c-title">2 squadre</div>
         </div>
         <div class="carousel-card" data-cmode="team3">
-          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <div class="c-title">3</div>
-          <div class="c-desc">squadre</div>
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+          <div class="c-title">3 squadre</div>
         </div>
         <div class="carousel-card" data-cmode="team4">
-          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <div class="c-title">4</div>
-          <div class="c-desc">squadre</div>
+          <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+          <div class="c-title">4 squadre</div>
         </div>
       </div>
     </div>
@@ -1449,7 +1456,7 @@
 
 <div class="mode-overlay" id="reset-confirm-overlay" style="display:none; z-index: 55;">
   <div class="mode-card">
-    <h2>Sei sicuro di annullare la partita in corso?</h2>
+    <h2 class="confirm-title">Volete annullare la partita in corso?</h2>
     <div class="btn-grid cols-2">
       <button class="btn stop" id="btn-reset-confirm-yes">Sì</button>
       <button class="btn neutral" id="btn-reset-confirm-no">No</button>
@@ -2073,7 +2080,8 @@
     plus2El.classList.remove('pulse');
     btnPassoEl.classList.remove('pulse');
   }
-  // Fase "si segna": Nuova parola / Raddoppio bloccati, punteggio e passo disponibili (solo la coppia coerente col tipo di parola). RESET disponibile.
+  // Fase "si segna": Nuova parola / Raddoppio bloccati, punteggio e passo disponibili (solo la coppia coerente col tipo di parola). RESET bloccato:
+  // finché non si assegna il punteggio (o il passo) non si può azzerare la partita.
   function enterScoringPhase() {
     playPhaseEnabled = false;
     updateNewWordButtonState();
@@ -2083,7 +2091,7 @@
     minus2El.disabled = activeMode !== 'double';
     plus2El.disabled = activeMode !== 'double';
     btnPassoEl.disabled = passi <= 0;
-    btnResetEl.disabled = false;
+    btnResetEl.disabled = true;
     minus1El.classList.toggle('pulse', !minus1El.disabled);
     plus1El.classList.toggle('pulse', !plus1El.disabled);
     minus2El.classList.toggle('pulse', !minus2El.disabled);
