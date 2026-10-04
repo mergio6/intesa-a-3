@@ -422,10 +422,13 @@
     color: #3A2200;
     text-transform: uppercase;
     white-space: normal;
-    max-width: 88%;
+    /* larghezza naturale del testo (non metà schermo, come per effetto di left:50%) */
+    width: max-content;
+    max-width: calc(100vw - 48px);
     font-size: clamp(15px, 5.5vw, 22px);
     line-height: 1.35;
   }
+  .center-notice .nw { white-space: nowrap; }
   .timer {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800;
@@ -814,6 +817,8 @@
     line-height: 1.05;
   }
   .carousel-card .c-desc { font-size: 13.5px; color: var(--text-dim); line-height: 1.4; }
+  /* frase breve + frase lunga: la prima sta su una riga a sé, con un po' di respiro prima della seconda */
+  .carousel-card .c-desc-lead { display: block; margin-bottom: 9px; }
 
 
   .carousel-card[data-cmode="facile"] { background-image: linear-gradient(165deg, var(--wash-green) 0%, rgba(0, 0, 0, 0) 72%); }
@@ -1049,6 +1054,9 @@
   .endgame-carousel.no-anim .endgame-slide,
   .endgame-carousel.dragging .endgame-slide { transition: none; }
   .endgame-slide .endgame-card { width: 100%; max-width: none; }
+  /* Le card hanno scorrimento verticale interno: senza questo il browser del telefono si prende
+     il gesto orizzontale e annulla il trascinamento (si poteva solo toccare, non scorrere col dito). */
+  .endgame-slide, .endgame-slide * { touch-action: pan-y; }
   .endgame-carousel.has-prev .endgame-card { box-shadow: 0 16px 36px -14px rgba(0, 0, 0, 0.45); }
   .endgame-card, .results-card {
     max-width: 380px;
@@ -1475,12 +1483,12 @@
         <div class="carousel-card" data-cmode="allenamento">
           <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 1.5"/><path d="M9.5 2.5h5"/><path d="M12 2.5V6"/><path d="M18.3 7.2l1.5-1.5"/></svg></div>
           <div class="c-title">Allenamento</div>
-          <div class="c-desc">Il campo di prova perfetto.<br>Scegliete il livello di difficoltà e allenate l'intesa, una parola alla volta</div>
+          <div class="c-desc"><span class="c-desc-lead">Il campo di prova perfetto</span>Scegliete il livello di difficoltà e allenate l'intesa, una parola alla volta</div>
         </div>
         <div class="carousel-card" data-cmode="sfida">
           <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a2 2 0 0 0 0 4h1"/><path d="M17 6h3a2 2 0 0 1 0 4h-1"/></svg></div>
           <div class="c-title">Sfida</div>
-          <div class="c-desc">Più squadre, un solo campione.<br>Sfidatevi a suon di parole e scoprite qual è il gruppo più affiatato</div>
+          <div class="c-desc"><span class="c-desc-lead">Più squadre, un solo campione</span>Sfidatevi a suon di parole e scoprite qual è il gruppo più affiatato</div>
         </div>
       </div>
     </div>
@@ -1496,17 +1504,17 @@
         <div class="carousel-card" data-cmode="facile">
           <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-8.5L6.5 21v-4.5H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z"/><path d="M9 7.7v.6"/><path d="M15 7.7v.6"/><path d="M9 11.7c.9 1.1 1.9 1.6 3 1.6s2.1-.5 3-1.6"/></svg></div>
           <div class="c-title">Primo incontro</div>
-          <div class="c-desc">Parole semplici per rompere il ghiaccio. Perfetta per scaldarsi e prendere confidenza con il gioco</div>
+          <div class="c-desc"><span class="c-desc-lead">Parole semplici per rompere il ghiaccio</span>Perfetta per scaldarsi e prendere confidenza con il gioco</div>
         </div>
         <div class="carousel-card" data-cmode="classica">
           <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="5"/><circle cx="8" cy="15" r="5"/><circle cx="16" cy="15" r="5"/></svg></div>
           <div class="c-title">Intesa a tre</div>
-          <div class="c-desc">L'allenamento ideale per prepararsi alla modalità Sfida. Qui si costruisce la vera intesa</div>
+          <div class="c-desc"><span class="c-desc-lead">Qui si costruisce la vera intesa</span>Parole di diversa difficoltà per prepararsi al meglio per la modalità Sfida</div>
         </div>
         <div class="carousel-card" data-cmode="difficile">
           <div class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M8.4 8.4a5.1 5.1 0 0 0 0 7.2"/><path d="M15.6 8.4a5.1 5.1 0 0 1 0 7.2"/><path d="M5.2 5.2a9.6 9.6 0 0 0 0 13.6"/><path d="M18.8 5.2a9.6 9.6 0 0 1 0 13.6"/></svg></div>
           <div class="c-title">Telepatia</div>
-          <div class="c-desc">Solo per chi si capisce al volo</div>
+          <div class="c-desc"><span class="c-desc-lead">Solo per chi si capisce al volo</span>Parole complesse che richiedono bravura e un'intesa fuori dal comune</div>
         </div>
       </div>
     </div>
@@ -2502,6 +2510,19 @@
   }
   setupFloatingWords();
 
+  // Tasti da tastiera nei menu (freccette, Invio, Backspace): attivi solo se il menu è davvero
+  // in primo piano, cioè non c'è la schermata iniziale né "Come si gioca" / Impostazioni aperte sopra.
+  function menuKeysAllowed() {
+    var splash = document.getElementById('splash-screen');
+    if (splash && splash.style.display !== 'none') return false;
+    var covers = ['howto-overlay', 'settings-overlay', 'reset-confirm-overlay'];
+    for (var i = 0; i < covers.length; i++) {
+      var el = document.getElementById(covers[i]);
+      if (el && el.style.display === 'flex') return false;
+    }
+    return true;
+  }
+
   function createCarousel3D(trackId, startIndex, onSelect) {
     var track = document.getElementById(trackId);
     var cards = Array.prototype.slice.call(track.querySelectorAll('.carousel-card'));
@@ -2571,8 +2592,10 @@
       playClickSound();
       if (onSelect) onSelect(cards[i].getAttribute('data-cmode'));
     }
+    // Si può premere SOLO la carta al centro: toccare una carta laterale non fa nulla,
+    // così non si sceglie per sbaglio quella sbagliata (per cambiare carta si scorre).
     cards.forEach(function (card, i) {
-      card.addEventListener('click', function () { if (!moved) selectCard(i); });
+      card.addEventListener('click', function () { if (!moved && i === activeIndex) selectCard(i); });
     });
     var vp = track.parentElement;
     vp.addEventListener('pointerdown', function (e) {
@@ -2584,6 +2607,26 @@
       dragDeltaX = e.clientX - dragStartX;
       if (Math.abs(dragDeltaX) > 4) moved = true;
       render(dragDeltaX / 2);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (track.getClientRects().length === 0) return; // menu non visibile
+      if (!menuKeysAllowed()) return;
+      // Invio = preme la carta in primo piano (quella al centro)
+      if (e.key === 'Enter') {
+        var tag = document.activeElement && document.activeElement.tagName;
+        if (e.repeat || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
+        // Un solo Invio = una sola scelta: senza questo, il menu che si apre subito dopo
+        // riceverebbe lo stesso Invio e sceglierebbe a sua volta, a catena.
+        if (e.__menuEnterHandled) return;
+        e.__menuEnterHandled = true;
+        e.preventDefault();
+        selectCard(activeIndex);
+        return;
+      }
+      var dir = e.key === 'ArrowLeft' ? -1 : (e.key === 'ArrowRight' ? 1 : 0);
+      if (!dir) return;
+      var t = stepIndex(dir);
+      if (t >= 0) { e.preventDefault(); playSlideSound(); goTo(t); }
     });
     window.addEventListener('pointerup', function () {
       if (!dragging) return;
@@ -2690,6 +2733,21 @@
     showTeamcountOverlay();
   });
 
+  // Backspace = "Indietro" nei menu (non mentre si scrive in un campo di testo)
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Backspace' || e.repeat) return;
+    var t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if (!menuKeysAllowed()) return;
+    var backId = null;
+    if (modeOverlayEl.style.display === 'flex') backId = 'btn-back-mode';
+    else if (teamcountOverlayEl.style.display === 'flex') backId = 'btn-back-teamcount';
+    else if (namesOverlayEl.style.display === 'flex') backId = 'btn-back-names';
+    if (!backId) return;
+    e.preventDefault();
+    document.getElementById(backId).click();
+  });
+
   function beginTeamRound(pos, keepPools) {
     var teamIdx = challengeTeamOrder[pos];
     var teamName = challengeTeams[teamIdx].name;
@@ -2697,7 +2755,7 @@
     teamNameBannerEl.hidden = false;
     enterGameplay();
     resetRoundState({ keepPools: keepPools, playSound: false });
-    showCenterNotice(escapeHtml(teamName.toUpperCase()) + '<br>È IL VOSTRO TURNO', 'turn', 3000);
+    showCenterNotice(escapeHtml(teamName.toUpperCase()) + '<br><span class="nw">È IL VOSTRO TURNO</span>', 'turn', 3000);
   }
 
   function captureCurrentTeamResult() {
