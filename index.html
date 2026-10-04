@@ -766,14 +766,12 @@
     width: 100%;
     height: clamp(340px, 58vh, 480px);
     position: relative;
-    perspective: 1300px;
     touch-action: pan-y;
   }
   .carousel-track {
     position: relative;
     width: 100%;
     height: 100%;
-    transform-style: preserve-3d;
   }
   .carousel-card {
     position: absolute;
@@ -818,28 +816,28 @@
   .carousel-card .c-desc { font-size: 13.5px; color: var(--text-dim); line-height: 1.4; }
 
 
-  .carousel-card[data-cmode="facile"] { background: linear-gradient(165deg, var(--wash-green) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="facile"] { background-image: linear-gradient(165deg, var(--wash-green) 0%, rgba(0, 0, 0, 0) 72%); }
   .carousel-card[data-cmode="facile"] .c-icon { background: var(--green); color: #0A2016; }
   .carousel-card[data-cmode="facile"] .c-title { color: var(--green); }
-  .carousel-card[data-cmode="difficile"] { background: linear-gradient(165deg, var(--wash-red) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="difficile"] { background-image: linear-gradient(165deg, var(--wash-red) 0%, rgba(0, 0, 0, 0) 72%); }
   .carousel-card[data-cmode="difficile"] .c-icon { background: var(--red); color: #fff; }
   .carousel-card[data-cmode="difficile"] .c-title { color: var(--red); }
-  .carousel-card[data-cmode="classica"] { background: linear-gradient(165deg, var(--wash-blue) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="classica"] { background-image: linear-gradient(165deg, var(--wash-blue) 0%, rgba(0, 0, 0, 0) 72%); }
   .carousel-card[data-cmode="classica"] .c-icon { background: var(--blue); color: #fff; }
   .carousel-card[data-cmode="classica"] .c-title { color: var(--blue); }
-  .carousel-card[data-cmode="allenamento"] { background: linear-gradient(165deg, var(--wash-blue) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="allenamento"] { background-image: linear-gradient(165deg, var(--wash-blue) 0%, rgba(0, 0, 0, 0) 72%); }
   .carousel-card[data-cmode="allenamento"] .c-icon { background: var(--blue); color: #fff; }
   .carousel-card[data-cmode="allenamento"] .c-title { color: var(--blue); }
-  .carousel-card[data-cmode="sfida"] { background: linear-gradient(165deg, var(--wash-orange) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="sfida"] { background-image: linear-gradient(165deg, var(--wash-orange) 0%, rgba(0, 0, 0, 0) 72%); }
   .carousel-card[data-cmode="sfida"] .c-icon { background: var(--orange); color: #1B1300; }
   .carousel-card[data-cmode="sfida"] .c-title { color: var(--orange-dark); }
-  .carousel-card[data-cmode="team2"] { background: linear-gradient(165deg, var(--wash-blue) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="team2"] { background-image: linear-gradient(165deg, var(--wash-blue) 0%, rgba(0, 0, 0, 0) 72%); }
   .carousel-card[data-cmode="team2"] .c-icon { background: var(--blue); color: #fff; }
   .carousel-card[data-cmode="team2"] .c-title { color: var(--blue); }
-  .carousel-card[data-cmode="team3"] { background: linear-gradient(165deg, var(--wash-green) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="team3"] { background-image: linear-gradient(165deg, var(--wash-green) 0%, rgba(0, 0, 0, 0) 72%); }
   .carousel-card[data-cmode="team3"] .c-icon { background: var(--green); color: #0A2016; }
   .carousel-card[data-cmode="team3"] .c-title { color: var(--green); }
-  .carousel-card[data-cmode="team4"] { background: linear-gradient(165deg, var(--wash-orange) 0%, var(--panel) 72%); }
+  .carousel-card[data-cmode="team4"] { background-image: linear-gradient(165deg, var(--wash-orange) 0%, rgba(0, 0, 0, 0) 72%); }
   .carousel-card[data-cmode="team4"] .c-icon { background: var(--orange); color: #1B1300; }
   .carousel-card[data-cmode="team4"] .c-title { color: var(--orange-dark); }
 
@@ -1029,6 +1027,29 @@
     from { opacity: 0; transform: translateY(16px) scale(0.96); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
+  /* Carosello 3D dei riepiloghi: stesso movimento dei menu di gioco */
+  .endgame-carousel {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    touch-action: pan-y;
+  }
+  .endgame-carousel.has-prev { cursor: grab; }
+  .endgame-carousel.dragging { cursor: grabbing; }
+  .endgame-track { position: relative; width: 100%; }
+  /* larghezza e posizione (a pixel interi) le imposta lo script: così il testo resta nitido */
+  .endgame-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: min(100%, 350px);
+    transition: transform 0.5s cubic-bezier(.34,1.56,.64,1), opacity 0.4s ease, filter 0.4s ease;
+  }
+  .endgame-carousel.has-prev .endgame-slide { user-select: none; -webkit-user-select: none; }
+  .endgame-carousel.no-anim .endgame-slide,
+  .endgame-carousel.dragging .endgame-slide { transition: none; }
+  .endgame-slide .endgame-card { width: 100%; max-width: none; }
+  .endgame-carousel.has-prev .endgame-card { box-shadow: 0 16px 36px -14px rgba(0, 0, 0, 0.45); }
   .endgame-card, .results-card {
     max-width: 380px;
     max-height: 88vh;
@@ -1288,10 +1309,10 @@
   }
   .names-confirm-btn:active { transform: scale(0.97); }
 
-  .results-title {
+  .mode-card h2.results-title {
     font-family: 'Baloo 2', 'Manrope', sans-serif;
     font-weight: 800;
-    font-size: clamp(25px, 7vw, 31px);
+    font-size: clamp(31px, 9vw, 40px);
     line-height: 1.1;
     color: var(--text);
     margin: -2px 0 0;
@@ -1533,8 +1554,8 @@
     <h2 class="results-title">Risultati finali</h2>
     <div class="results-list" id="results-list"></div>
     <div class="btn-grid cols-2" style="width:100%; margin-top:8px;">
+      <button class="mode-btn easy" id="btn-results-again">Gioca di nuovo</button>
       <button class="mode-btn howto" id="btn-results-menu">Torna al<br>menu iniziale</button>
-      <button class="mode-btn easy" id="btn-results-again">Gioca<br>di nuovo</button>
     </div>
   </div>
 </div>
@@ -1608,6 +1629,9 @@
 </div>
 
 <div class="mode-overlay" id="endgame-overlay" style="display:none; z-index: 52;">
+  <div class="endgame-carousel" id="endgame-carousel">
+    <div class="endgame-track" id="endgame-track">
+    <div class="endgame-slide" id="endgame-slide-current">
   <div class="mode-card endgame-card">
     <div class="endgame-badge" id="endgame-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a2 2 0 0 0 0 4h1"/><path d="M17 6h3a2 2 0 0 1 0 4h-1"/></svg></div>
     <div class="endgame-team-label" id="endgame-team-label" hidden></div>
@@ -1637,6 +1661,9 @@
     <div class="endgame-words" id="endgame-words" hidden></div>
     <div class="endgame-word-detail" id="endgame-word-detail" hidden></div>
     <div class="endgame-actions" id="endgame-actions"></div>
+  </div>
+    </div>
+    </div>
   </div>
 </div>
 
@@ -2481,6 +2508,19 @@
     var activeIndex = startIndex || 0;
     var dragging = false, dragStartX = 0, dragDeltaX = 0, moved = false;
     var n = cards.length;
+    // Larghezza e posizione a pixel interi (niente mezzi pixel = testo nitido sui telefoni).
+    function fixCardSizes() {
+      var trackW = Math.min(window.innerWidth - 40, 520);
+      var w = Math.floor(Math.min(window.innerWidth * 0.76, 290) / 2) * 2;
+      var left = Math.round((trackW - w) / 2);
+      cards.forEach(function (card) {
+        card.style.width = w + 'px';
+        card.style.left = left + 'px';
+        card.style.marginLeft = '0px';
+      });
+    }
+    fixCardSizes();
+    window.addEventListener('resize', fixCardSizes);
     // Con 3 o più carte il carosello è "circolare": la carta che altrimenti
     // resterebbe fuori schermo compare sul lato libero, più lontana e sfumata.
     var circular = n >= 3;
@@ -2504,9 +2544,12 @@
         var rot = offset * -26 + extraPx / 9;
         var scale = offset === 0 ? 1 : (far ? 0.72 : 0.82);
         var opacity = absOff > 1 ? 0 : (offset === 0 ? 1 : (far ? 0.34 : 0.62));
-        card.style.transform = 'translateX(' + x + '%) translateZ(' + z + 'px) rotateY(' + rot + 'deg) scale(' + scale + ')';
+        // carta attiva ferma: nessuna trasformazione né filtro (testo nitido); il 3D vale per le laterali
+        card.style.transform = (offset === 0 && extraPx === 0)
+          ? 'none'
+          : 'perspective(1300px) translateX(' + x + '%) translateZ(' + z + 'px) rotateY(' + rot + 'deg) scale(' + scale + ')';
         card.style.opacity = opacity;
-        card.style.filter = offset === 0 ? 'blur(0px)' : (far ? 'blur(2.6px)' : 'blur(1.5px)');
+        card.style.filter = offset === 0 ? 'none' : (far ? 'blur(2.6px)' : 'blur(1.5px)');
         card.style.pointerEvents = absOff > 1 ? 'none' : 'auto';
         card.style.zIndex = String(10 - absOff - (far ? 1 : 0));
       });
@@ -2654,7 +2697,7 @@
     teamNameBannerEl.hidden = false;
     enterGameplay();
     resetRoundState({ keepPools: keepPools, playSound: false });
-    showCenterNotice(escapeHtml(teamName.toUpperCase()) + '<br>È IL TUO TURNO', 'turn', 3000);
+    showCenterNotice(escapeHtml(teamName.toUpperCase()) + '<br>È IL VOSTRO TURNO', 'turn', 3000);
   }
 
   function captureCurrentTeamResult() {
@@ -2662,6 +2705,7 @@
     var teamIdx = challengeTeamOrder[challengeCurrentPos];
     challengeTeams[teamIdx].score = score;
     challengeTeams[teamIdx].avgTime = avg;
+    challengeTeams[teamIdx].recap = currentRecapSnapshot();
   }
 
   // ---------- spareggio ----------
@@ -2934,7 +2978,7 @@
 
   document.getElementById('btn-results-again').addEventListener('click', function () {
     playClickSound();
-    challengeTeams.forEach(function (t) { t.score = 0; t.avgTime = null; });
+    challengeTeams.forEach(function (t) { t.score = 0; t.avgTime = null; t.recap = null; });
     challengeTeamOrder = shuffleGeneric(challengeTeamOrder);
     challengeCurrentPos = 0;
     challengeMode = true;
@@ -3192,6 +3236,9 @@
   var endgameWordsLabelEl = document.getElementById('endgame-words-label');
   var endgameWordsEl = document.getElementById('endgame-words');
   var endgameDetailEl = document.getElementById('endgame-word-detail');
+  var endgameCarouselEl = document.getElementById('endgame-carousel');
+  var endgameTrackEl = document.getElementById('endgame-track');
+  var endgameCurrentSlideEl = document.getElementById('endgame-slide-current');
   var ICON_BOLT = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>';
   var ICON_TURTLE = '<svg viewBox="1 6.6 22.6 14.2" fill="currentColor"><path d="M3.5 16a8 8 0 0 1 16 0z"/><circle cx="21.2" cy="13.6" r="2.4"/><rect x="5.5" y="15.4" width="3.6" height="4.6" rx="1.3"/><rect x="13.9" y="15.4" width="3.6" height="4.6" rx="1.3"/><path d="M3.5 16 1.2 17.4 3.9 14z"/></svg>';
   var ICON_TROPHY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a2 2 0 0 0 0 4h1"/><path d="M17 6h3a2 2 0 0 1 0 4h-1"/></svg>';
@@ -3207,24 +3254,25 @@
     return b;
   }
 
-  function renderEndgameWords() {
-    endgameWordsEl.innerHTML = '';
-    if (playedWords.length === 0) {
-      endgameWordsLabelEl.hidden = true;
-      endgameWordsEl.hidden = true;
-      endgameDetailEl.hidden = true;
+  // Disegna le parole di una partita (cliccabili, con fulmine e tartaruga) dentro una card.
+  function renderWordsInto(list, wordsLabelEl, wordsEl, detailEl) {
+    wordsEl.innerHTML = '';
+    if (list.length === 0) {
+      wordsLabelEl.hidden = true;
+      wordsEl.hidden = true;
+      detailEl.hidden = true;
       return;
     }
-    endgameWordsLabelEl.hidden = false;
-    endgameWordsEl.hidden = false;
-    endgameDetailEl.hidden = false;
+    wordsLabelEl.hidden = false;
+    wordsEl.hidden = false;
+    detailEl.hidden = false;
 
     // Fulmine: la parola indovinata più in fretta. Tartaruga: la parola che ha
     // richiesto più tempo in assoluto (indovinata, sbagliata o passata).
     var fastestIdx = -1, slowestIdx = -1;
-    if (playedWords.length >= 2) {
+    if (list.length >= 2) {
       var minCorrect = Infinity, maxAll = -Infinity, minAll = Infinity;
-      playedWords.forEach(function (w, i) {
+      list.forEach(function (w, i) {
         if (w.time === null || w.time === undefined) return;
         if (w.time < minAll) minAll = w.time;
         if (w.outcome === 'correct' && w.time < minCorrect) { minCorrect = w.time; fastestIdx = i; }
@@ -3236,20 +3284,20 @@
 
     var selectedChip = null;
     function showDefaultDetail() {
-      endgameDetailEl.className = 'endgame-word-detail';
-      endgameDetailEl.textContent = 'Tocca una parola per vedere il tempo impiegato';
+      detailEl.className = 'endgame-word-detail';
+      detailEl.textContent = 'Tocca una parola per vedere il tempo impiegato';
     }
     var verbs = { correct: 'indovinata in ', wrong: 'sbagliata dopo ', passed: 'passata dopo ' };
     function showWordDetail(item, idx) {
-      endgameDetailEl.className = 'endgame-word-detail ' + item.outcome;
-      endgameDetailEl.innerHTML = '';
+      detailEl.className = 'endgame-word-detail ' + item.outcome;
+      detailEl.innerHTML = '';
       var strong = document.createElement('strong');
       strong.textContent = item.word;
-      endgameDetailEl.appendChild(strong);
-      endgameDetailEl.appendChild(document.createTextNode(' ' + verbs[item.outcome] + formatWordSeconds(item.time)));
+      detailEl.appendChild(strong);
+      detailEl.appendChild(document.createTextNode(' ' + verbs[item.outcome] + formatWordSeconds(item.time)));
     }
 
-    playedWords.forEach(function (item, idx) {
+    list.forEach(function (item, idx) {
       var chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'endgame-word-chip ' + item.outcome;
@@ -3269,11 +3317,179 @@
           showWordDetail(item, idx);
         }
       });
-      endgameWordsEl.appendChild(chip);
+      wordsEl.appendChild(chip);
     });
     showDefaultDetail();
 
   }
+
+  function renderEndgameWords() {
+    renderWordsInto(playedWords, endgameWordsLabelEl, endgameWordsEl, endgameDetailEl);
+  }
+
+  // Istantanea della partita appena finita, da conservare per squadra (serve per rivedere i riepiloghi).
+  function currentRecapSnapshot() {
+    var avg = wordTimes.length ? (wordTimes.reduce(function (a, b) { return a + b; }, 0) / wordTimes.length) : null;
+    return { score: score, correct: wordsCorrectCount, wrong: wordsWrongCount, passi: passiUsedCount, avg: avg, words: playedWords.slice() };
+  }
+
+  // Carosello 3D per i riepiloghi delle squadre (trascinabile con dito o mouse,
+  // frecce della tastiera e rotella orizzontale per chi gioca da computer).
+  function createRecapCarousel(viewportEl, trackEl, isActive) {
+    var slides = [];
+    var activeIndex = 0;
+    var dragging = false, dragStartX = 0, dragDeltaX = 0, moved = false, suppressClick = false, wheelLock = false;
+
+    function render(extraPx) {
+      extraPx = extraPx || 0;
+      slides.forEach(function (slide, i) {
+        var offset = i - activeIndex;
+        var absOff = Math.abs(offset);
+        var x = offset * 76 + extraPx / 2.6;
+        var z = -absOff * 170;
+        var rot = offset * -26 + extraPx / 9;
+        var scale = offset === 0 ? 1 : 0.84;
+        // La scheda attiva (ferma) non ha NESSUNA trasformazione né filtro: così il
+        // testo viene disegnato nitido. Il 3D vale solo per quelle laterali o durante il trascinamento.
+        slide.style.transform = (offset === 0 && extraPx === 0)
+          ? 'none'
+          : 'perspective(1300px) translateX(' + x + '%) translateZ(' + z + 'px) rotateY(' + rot + 'deg) scale(' + scale + ')';
+        slide.style.opacity = absOff > 1 ? 0 : (offset === 0 ? 1 : 0.6);
+        slide.style.filter = offset === 0 ? 'none' : 'blur(1.5px)';
+        slide.style.pointerEvents = absOff > 1 ? 'none' : 'auto';
+        slide.style.zIndex = String(10 - absOff);
+      });
+    }
+    // le schede sono in posizione assoluta: l'altezza del contenitore è quella della più alta
+    function layout() {
+      var trackW = trackEl.clientWidth;
+      // larghezza intera e pari, posizione a pixel interi: niente mezzi pixel = niente testo sfocato
+      var w = Math.floor(Math.min(slides.length > 1 ? trackW * 0.9 : trackW, 350) / 2) * 2;
+      slides.forEach(function (s) { s.style.width = w + 'px'; });
+      var maxH = 0;
+      slides.forEach(function (s) { if (s.offsetHeight > maxH) maxH = s.offsetHeight; });
+      trackEl.style.height = maxH + 'px';
+      var left = Math.round((trackW - w) / 2);
+      slides.forEach(function (s) {
+        s.style.left = left + 'px';
+        s.style.top = Math.round((maxH - s.offsetHeight) / 2) + 'px';
+      });
+    }
+    function goTo(i) {
+      activeIndex = Math.max(0, Math.min(slides.length - 1, i));
+      render();
+    }
+    function step(dir) {
+      var t = activeIndex + dir;
+      if (t < 0 || t > slides.length - 1) return false;
+      playSlideSound();
+      goTo(t);
+      return true;
+    }
+    // da richiamare quando l'elenco delle schede cambia (con la finestra già visibile)
+    function refresh(startIndex) {
+      slides = Array.prototype.slice.call(trackEl.children);
+      activeIndex = Math.max(0, Math.min(slides.length - 1, startIndex || 0));
+      viewportEl.classList.add('no-anim');
+      layout();
+      render();
+      void viewportEl.offsetWidth;
+      requestAnimationFrame(function () { viewportEl.classList.remove('no-anim'); });
+    }
+
+    viewportEl.addEventListener('pointerdown', function (e) {
+      if (slides.length < 2) return;
+      dragging = true; dragStartX = e.clientX; dragDeltaX = 0; moved = false;
+    });
+    window.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      dragDeltaX = e.clientX - dragStartX;
+      if (!moved && Math.abs(dragDeltaX) > 6) { moved = true; viewportEl.classList.add('dragging'); }
+      if (moved) render(dragDeltaX / 2);
+    });
+    function endDrag(allowStep) {
+      if (!dragging) return;
+      dragging = false;
+      viewportEl.classList.remove('dragging');
+      if (moved) {
+        // il rilascio dopo un trascinamento non deve premere pulsanti o parole sotto il dito/mouse
+        suppressClick = true;
+        setTimeout(function () { suppressClick = false; }, 0);
+        var done = false;
+        if (allowStep && dragDeltaX < -36) done = step(1);
+        else if (allowStep && dragDeltaX > 36) done = step(-1);
+        if (!done) render();
+      }
+      dragDeltaX = 0; moved = false;
+    }
+    window.addEventListener('pointerup', function () { endDrag(true); });
+    window.addEventListener('pointercancel', function () { endDrag(false); });
+
+    // toccando/cliccando una scheda laterale la si porta al centro
+    viewportEl.addEventListener('click', function (e) {
+      if (suppressClick) { e.stopPropagation(); e.preventDefault(); return; }
+      var slide = e.target.closest ? e.target.closest('.endgame-slide') : null;
+      var idx = slides.indexOf(slide);
+      if (idx !== -1 && idx !== activeIndex) {
+        e.stopPropagation(); e.preventDefault();
+        playSlideSound();
+        goTo(idx);
+      }
+    }, true);
+
+    document.addEventListener('keydown', function (e) {
+      if (!isActive() || slides.length < 2) return;
+      if (e.key === 'ArrowLeft') { step(-1); e.preventDefault(); }
+      else if (e.key === 'ArrowRight') { step(1); e.preventDefault(); }
+    });
+    viewportEl.addEventListener('wheel', function (e) {
+      if (slides.length < 2) return;
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || Math.abs(e.deltaX) < 20) return;
+      e.preventDefault();
+      if (wheelLock) return;
+      wheelLock = true;
+      setTimeout(function () { wheelLock = false; }, 450);
+      step(e.deltaX > 0 ? 1 : -1);
+    }, { passive: false });
+    window.addEventListener('resize', function () { if (isActive()) layout(); });
+
+    return { refresh: refresh };
+  }
+  var endgameRecap = createRecapCarousel(endgameCarouselEl, endgameTrackEl, function () {
+    return endgameOverlayEl.style.display === 'flex';
+  });
+
+  function clearEndgamePrevSlides() {
+    Array.prototype.slice.call(endgameCarouselEl.querySelectorAll('.endgame-slide.prev')).forEach(function (s) {
+      s.parentNode.removeChild(s);
+    });
+    endgameCarouselEl.classList.remove('has-prev');
+  }
+
+  // Costruisce la card di riepilogo di una squadra già giocata, copiando la struttura della card attuale.
+  function buildPrevRecapSlide(team) {
+    var r = team.recap;
+    var slide = document.createElement('div');
+    slide.className = 'endgame-slide prev';
+    var card = endgameCurrentSlideEl.querySelector('.endgame-card').cloneNode(true);
+    Array.prototype.slice.call(card.querySelectorAll('[id]')).forEach(function (e) { e.removeAttribute('id'); });
+    card.style.animation = 'none';
+    function q(sel) { return card.querySelector(sel); }
+    q('.endgame-badge').innerHTML = ICON_TROPHY;
+    var label = q('.endgame-team-label');
+    label.hidden = false;
+    label.textContent = team.name;
+    q('.endgame-score-value').textContent = r.score;
+    q('.endgame-stat.is-correct .endgame-stat-value').textContent = r.correct;
+    q('.endgame-stat.is-wrong .endgame-stat-value').textContent = r.wrong;
+    q('.endgame-stat.is-passo .endgame-stat-value').textContent = r.passi;
+    q('.endgame-stat.is-time .endgame-stat-value').textContent = r.avg === null ? '—' : r.avg.toFixed(1).replace('.', ',') + ' s';
+    q('.endgame-actions').innerHTML = '';
+    renderWordsInto(r.words || [], q('.endgame-words-label'), q('.endgame-words'), q('.endgame-word-detail'));
+    slide.appendChild(card);
+    return slide;
+  }
+
   function renderEndgameActions() {
     var wrap = document.getElementById('endgame-actions');
     wrap.innerHTML = '';
@@ -3311,7 +3527,7 @@
       });
       var toMenu = document.createElement('button');
       toMenu.className = 'mode-btn howto';
-      toMenu.textContent = 'Torna al menu iniziale';
+      toMenu.innerHTML = 'Torna al<br>menu iniziale';
       toMenu.addEventListener('click', function () {
         playClickSound();
         resetRoundState({ keepPools: false, playSound: false });
@@ -3356,10 +3572,25 @@
       teamLabelEl.hidden = true;
     }
     renderEndgameActions();
+    // Dalla seconda squadra in poi: a sinistra le schede delle squadre già giocate.
+    clearEndgamePrevSlides();
+    var prevCount = 0;
+    if (challengeMode && challengeCurrentPos > 0) {
+      var prevSlides = [];
+      for (var p = 0; p < challengeCurrentPos; p++) {
+        var prevTeam = challengeTeams[challengeTeamOrder[p]];
+        if (prevTeam && prevTeam.recap) prevSlides.push(buildPrevRecapSlide(prevTeam));
+      }
+      prevSlides.forEach(function (s) { endgameTrackEl.insertBefore(s, endgameCurrentSlideEl); });
+      if (prevSlides.length) endgameCarouselEl.classList.add('has-prev');
+      prevCount = prevSlides.length;
+    }
     endgameOverlayEl.style.display = 'flex';
+    // la squadra attuale è l'ultima: parto da lì
+    endgameRecap.refresh(prevCount);
     playEndGameJingle(score);
   }
-  function hideEndGameScreen() { endgameOverlayEl.style.display = 'none'; }
+  function hideEndGameScreen() { endgameOverlayEl.style.display = 'none'; clearEndgamePrevSlides(); }
 
   // ---------- mini-timer di risposta (3 secondi dopo lo STOP) ----------
   var ANSWER_SECONDS = 3;
