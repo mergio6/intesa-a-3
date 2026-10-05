@@ -2527,9 +2527,56 @@
   function saveSettings() {
     try { localStorage.setItem('intesa-a-3-settings', JSON.stringify(appSettings)); } catch (e) { /* ignora */ }
   }
-  function vibrate(pattern) {
+  /*HAP-START*/
+  // ===== VIBRAZIONI =====
+  // Poche, brevi e legate ai suoni (stesso ritmo): un "tic" leggero per le scelte, impulsi che seguono le note
+  // per risposte esatte/sbagliate, e vibrazioni più decise solo per STOP, risposta scaduta e fine tempo.
+  // La vibrazione dei telefoni ha solo durata e pause (non l'intensità): per questo gli impulsi sono corti
+  // (10-50 ms) e la durata totale non supera mai circa mezzo secondo.
+  // pri = priorità: se una vibrazione è in corso, ne parte un'altra solo se ha priorità più alta (così non si
+  // interrompono a metà). p = impulsi e pause in millisecondi (impulso, pausa, impulso...).
+  var HAPTIC_PATTERNS = {
+    // leggere (1)
+    tick:       { pri: 1, p: [12] },
+    select:     { pri: 1, p: [12] },
+    passo:      { pri: 1, p: [12] },
+    notifyTurn: { pri: 1, p: [14] },
+    notifyEx:   { pri: 1, p: [12] },
+    // normali (2)
+    newWord:    { pri: 2, p: [10, 34, 10, 34, 10, 34, 10, 34, 18] },
+    double:     { pri: 2, p: [10, 28, 10, 28, 10, 28, 10, 28, 10, 28, 26] },
+    correct:    { pri: 2, p: [14, 52, 24] },
+    correct2:   { pri: 2, p: [14, 46, 18, 46, 30] },
+    wrong:      { pri: 2, p: [34, 146, 24] },
+    wrong2:     { pri: 2, p: [34, 146, 24, 156, 20] },
+    reset:      { pri: 2, p: [20, 70, 12] },
+    notifyTie:  { pri: 2, p: [14, 70, 24] },
+    welcome:    { pri: 2, p: [14, 80, 22] },
+    jingleLow:  { pri: 2, p: [18] },
+    jingleMid:  { pri: 2, p: [16, 60, 16] },
+    jingleHigh: { pri: 2, p: [16, 50, 16, 50, 30] },
+    results:    { pri: 2, p: [14, 60, 18, 60, 24, 60, 34] },
+    // decise (3)
+    stop:       { pri: 3, p: [42, 148, 42] },
+    answerUp:   { pri: 3, p: [48, 45, 38, 60, 28, 90, 18] },
+    // allarme (4)
+    timeUp:     { pri: 4, p: [40, 130, 40, 130, 40, 170, 90] }
+  };
+  /*HAP-END*/
+
+  var hapticBusyUntil = 0, hapticBusyPri = 0;
+  function haptic(name) {
     if (!appSettings.vibration) return;
-    try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) { /* non supportata su questo dispositivo */ }
+    var h = HAPTIC_PATTERNS[name];
+    if (!h) return;
+    var now = Date.now();
+    if (now < hapticBusyUntil && h.pri <= hapticBusyPri) return; // una vibrazione più importante (o uguale) è in corso
+    try {
+      if (!navigator.vibrate) return; // non supportata (per esempio su iPhone)
+      navigator.vibrate(h.p.length === 1 ? h.p[0] : h.p);
+      hapticBusyUntil = now + h.p.reduce(function (a, b) { return a + b; }, 0);
+      hapticBusyPri = h.pri;
+    } catch (e) { /* non supportata su questo dispositivo */ }
   }
   loadSettings();
   applyTextScale();
@@ -2563,13 +2610,29 @@
   };
   // Finché un messaggio al centro è visibile i pulsanti di gioco sono bloccati (non premibili, non pulsano):
   // altrimenti si può premere "Nuova parola" con la finestrella ancora aperta. Tornano attivi quando scompare.
-  var noticeLocked = false;
+  var noticeLocked = false;       // vero se i pulsanti sono bloccati, per uno qualsiasi dei due motivi sotto
+  var noticeShowLock = false;     // motivo 1: c'è un messaggio al centro visibile
+  var transitionHold = 0;         // motivo 2: una transizione è in attesa che finisca un suono
   var noticeUnlockTimer = null;
-  function setNoticeLock(on) {
-    noticeLocked = on;
+  function refreshLock() {
+    noticeLocked = noticeShowLock || transitionHold > 0;
     var v = document.getElementById('view-play');
-    if (v) v.classList.toggle('notice-lock', on);
+    if (v) v.classList.toggle('notice-lock', noticeLocked);
   }
+  function setNoticeLock(on) { noticeShowLock = on; refreshLock(); }
+  // Aspetta "ms" (il tempo che il suono appena partito finisca) con i pulsanti bloccati, poi esegue "then":
+  // così suoni e messaggi/finestre che seguono non si sovrappongono e nessuno può premere nell'attesa.
+  function holdButtons(ms, then) {
+    transitionHold++;
+    refreshLock();
+    setTimeout(function () {
+      if (then) then();
+      transitionHold = Math.max(0, transitionHold - 1);
+      refreshLock();
+    }, ms);
+  }
+  // tempo che serve al suono del punteggio per finire (+1, +2, −1, −2)
+  function scoreSoundDelay(delta) { return delta > 0 ? (delta > 1 ? 1200 : 1050) : (delta < -1 ? 1000 : 850); }
   function releaseNoticeLock() {
     clearTimeout(noticeUnlockTimer);
     // dopo la dissolvenza (0,25 s): così i pulsanti si riattivano solo quando la finestra è davvero sparita
@@ -2901,7 +2964,10 @@
       }
       if (raddoppiExhaustedPending) {
         raddoppiExhaustedPending = false;
-        showCenterNotice('<span class="cn-title sm">RADDOPPI ESAURITI</span>', 'raddoppio');
+        // il messaggio compare dopo che il suono del punteggio è finito (e non a fine partita: sarebbe inutile)
+        if (!pendingEndOfGame) holdButtons(scoreSoundDelay(delta), function () {
+          showCenterNotice('<span class="cn-title sm">RADDOPPI ESAURITI</span>', 'raddoppio');
+        });
       }
       if (pendingEndOfGame) {
         if (pendingWordTime !== null) wordTimes.push(pendingWordTime);
@@ -2909,7 +2975,7 @@
         minus1El.classList.remove('pulse'); plus1El.classList.remove('pulse'); minus2El.classList.remove('pulse'); plus2El.classList.remove('pulse'); btnPassoEl.classList.remove('pulse');
         // la schermata di fine partita compare solo dopo che il suono del punteggio è finito,
         // così non si sovrappone alla fanfara finale
-        pendingFinalizeTimeoutId = setTimeout(finalizeEndOfGame, delta > 0 ? (delta > 1 ? 1200 : 1050) : (delta < -1 ? 1000 : 850));
+        pendingFinalizeTimeoutId = setTimeout(finalizeEndOfGame, scoreSoundDelay(delta));
       } else {
         enterPlayPhase();
       }
@@ -2925,10 +2991,7 @@
       pendingWordTime = null;
       minus1El.disabled = true; plus1El.disabled = true; minus2El.disabled = true; plus2El.disabled = true; btnPassoEl.disabled = true;
       minus1El.classList.remove('pulse'); plus1El.classList.remove('pulse'); minus2El.classList.remove('pulse'); plus2El.classList.remove('pulse'); btnPassoEl.classList.remove('pulse');
-      if (raddoppiExhaustedPending) {
-        raddoppiExhaustedPending = false;
-        showCenterNotice('<span class="cn-title sm">RADDOPPI ESAURITI</span>', 'raddoppio');
-      }
+      raddoppiExhaustedPending = false; // a fine partita il messaggio "raddoppi esauriti" non serve più
       pendingFinalizeTimeoutId = setTimeout(finalizeEndOfGame, 500);
       return;
     }
@@ -2940,11 +3003,14 @@
     passiUsedCount++;
     stopAnswerTimer();
     playPassoSound();
-    if (passi === 0) showCenterNotice('<span class="cn-title sm">PASSO ESAURITI</span>', 'passo');
-    if (raddoppiExhaustedPending) {
-      raddoppiExhaustedPending = false;
-      showCenterNotice('<span class="cn-title sm">RADDOPPI ESAURITI</span>', 'raddoppio');
-    }
+    var passoExhaustedNow = passi === 0;
+    var raddoppiExhaustedNow = raddoppiExhaustedPending;
+    raddoppiExhaustedPending = false;
+    // i messaggi compaiono dopo il suono del passo (e restano bloccati i pulsanti nell'attesa)
+    if (passoExhaustedNow || raddoppiExhaustedNow) holdButtons(650, function () {
+      if (passoExhaustedNow) showCenterNotice('<span class="cn-title sm">PASSO ESAURITI</span>', 'passo');
+      else showCenterNotice('<span class="cn-title sm">RADDOPPI ESAURITI</span>', 'raddoppio');
+    });
     enterPlayPhase();
   });
 
@@ -3569,13 +3635,18 @@
   function advanceTiebreakTurn() {
     tiebreakPos++;
     if (tiebreakPos < tiebreakTeamIndices.length) {
-      clearWord('Premi «Parola per lo spareggio» per iniziare');
-      showIdleRow();
-      enterPlayPhase();
-      var nextName = challengeTeams[tiebreakTeamIndices[tiebreakPos]].name;
-      teamNameBannerEl.textContent = nextName;
-      updateTiebreakTargetBanner();
-      announceTiebreakTurn(nextName);
+      var nextPos = tiebreakPos;
+      // si passa alla squadra successiva solo dopo che il suono dell'ultima risposta è finito,
+      // altrimenti si fonde con l'annuncio del turno
+      holdButtons(tiebreakAnswerDelay, function () {
+        clearWord('Premi «Parola per lo spareggio» per iniziare');
+        showIdleRow();
+        enterPlayPhase();
+        var nextName = challengeTeams[tiebreakTeamIndices[nextPos]].name;
+        teamNameBannerEl.textContent = nextName;
+        updateTiebreakTargetBanner();
+        announceTiebreakTurn(nextName);
+      });
     } else {
       finishTiebreakRound();
     }
@@ -3587,14 +3658,14 @@
       var r = tiebreakResults[i];
       if (r && r.correct) correctResults.push({ idx: idx, time: r.time });
     });
-    if (correctResults.length === 0) { restartTiebreak(); return; }
+    if (correctResults.length === 0) { holdButtons(tiebreakAnswerDelay, restartTiebreak); return; }
     var minTime = Math.min.apply(null, correctResults.map(function (r) { return r.time; }));
     var winners = correctResults.filter(function (r) { return r.time === minTime; });
     if (winners.length > 1) {
       // Al nuovo giro partecipano solo le squadre che hanno indovinato col tempo migliore.
       var winnerIdxSet = winners.map(function (w) { return w.idx; });
       tiebreakTeamIndices = tiebreakTeamIndices.filter(function (idx) { return winnerIdxSet.indexOf(idx) !== -1; });
-      restartTiebreak();
+      holdButtons(tiebreakAnswerDelay, restartTiebreak);
       return;
     }
     var winnerIdx = winners[0].idx;
@@ -3614,8 +3685,7 @@
     resetTiebreakState();
     tiebreakResolvedOrder = resolvedOrder;
     // la classifica compare dopo il suono dell'ultima risposta; nell'attesa i pulsanti sono bloccati
-    setNoticeLock(true);
-    setTimeout(function () { setNoticeLock(false); showResultsOverlay(); }, 1050);
+    holdButtons(1050, showResultsOverlay);
   }
 
   function handleTiebreakDraw() {
@@ -3635,7 +3705,6 @@
     showRunningRow();
     btnResetEl.disabled = true;
     playGenerateSound();
-    vibrate(25);
   }
 
   function handleTiebreakStop() {
@@ -3643,10 +3712,11 @@
     showIdleRow();
     enterScoringPhase();
     playStopSound();
-    vibrate(50);
   }
 
+  var tiebreakAnswerDelay = 1000; // quanto aspettare dopo l'ultima risposta (dipende dalla durata del suono)
   function handleTiebreakAnswer(isCorrect) {
+    tiebreakAnswerDelay = isCorrect ? 1000 : 800;
     if (isCorrect) {
       playPositiveSound();
       tiebreakResults[tiebreakPos] = { correct: true, time: tiebreakPendingElapsed };
@@ -4094,21 +4164,23 @@
 
   function soundNew() { return appSettings.soundStyle !== 'classic'; }
   // suoni nuovi: STOP, fine tempo, raddoppio, indietro e scelta carta hanno ora un suono tutto loro
-  function playStopSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('stop'); else playAlertSound(); }
-  function playTimeUpSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('timeUp'); else playAlertSound(); }
-  function playDoubleSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('double'); else playGenerateSound(); }
+  function playStopSound() { haptic('stop'); if (!appSettings.audio) return; if (soundNew()) NS.play('stop'); else playAlertSound(); }
+  function playTimeUpSound() { haptic('timeUp'); if (!appSettings.audio) return; if (soundNew()) NS.play('timeUp'); else playAlertSound(); }
+  function playDoubleSound() { haptic('double'); if (!appSettings.audio) return; if (soundNew()) NS.play('double'); else playGenerateSound(true); }
   function playBackSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('back'); else playClickSound(); }
   // ---------- suono di accesso al gioco ----------
   // Parte quando il giocatore preme "Inizia" sulla schermata del titolo: essendo un tocco dell'utente,
   // i browser lo permettono sempre (prima, da solo, poteva essere bloccato).
   function playWelcomeSound() {
+    haptic('welcome');
     if (!appSettings.audio) return;
-    if (soundNew()) NS.play('welcome'); else playPositiveSound();
+    if (soundNew()) NS.play('welcome'); else playPositiveSound(undefined, true);
   }
-  function playResultsSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('results'); else playEndGameJingle(99); }
-  function playSelectSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('select'); else playClickSound(); }
+  function playResultsSound() { haptic('results'); if (!appSettings.audio) return; if (soundNew()) NS.play('results'); else playEndGameJingle(99, true); }
+  function playSelectSound() { haptic('select'); if (!appSettings.audio) return; if (soundNew()) NS.play('select'); else playClickSound(); }
 
-  function playPositiveSound(delta) {
+  function playPositiveSound(delta, noHaptic) {
+    if (!noHaptic) haptic(delta > 1 ? 'correct2' : 'correct');
     if (!appSettings.audio) return;
     if (soundNew()) { NS.play('positive', delta > 1); return; }
     // Piccolo "level up": arpeggio ascendente allegro invece di un singolo tono.
@@ -4120,12 +4192,13 @@
     ]);
   }
   function playNegativeSound(delta) {
+    haptic(delta < -1 ? 'wrong2' : 'wrong');
     if (!appSettings.audio) return;
     if (soundNew()) { NS.play('negative', delta < -1); return; }
     playTone(420, 160, 0.28, 'sawtooth', 0.26);
   }
-  function playPassoSound() { if (!appSettings.audio) return; if (soundNew()) { NS.play('passo'); return; } playTone(600, 600, 0.12, 'triangle', 0.22); }
-  function playResetSound() { if (!appSettings.audio) return; if (soundNew()) { NS.play('reset'); return; } playTone(300, 1000, 0.22, 'square', 0.22); }
+  function playPassoSound() { haptic('passo'); if (!appSettings.audio) return; if (soundNew()) { NS.play('passo'); return; } playTone(600, 600, 0.12, 'triangle', 0.22); }
+  function playResetSound() { haptic('reset'); if (!appSettings.audio) return; if (soundNew()) { NS.play('reset'); return; } playTone(300, 1000, 0.22, 'square', 0.22); }
   function playClickSound() { if (!appSettings.audio) return; if (soundNew()) { NS.play('click'); return; } playTone(680, 880, 0.09, 'sine', 0.2); }
   function playSlideSound() {
     if (!appSettings.audio) return;
@@ -4134,6 +4207,7 @@
     playTone(560, 280, 0.14, 'triangle', 0.095);
   }
   function playNotifySound(kind) {
+    haptic(kind === 'turn' ? 'notifyTurn' : (kind === 'tiebreak' ? 'notifyTie' : 'notifyEx'));
     if (!appSettings.audio) return;
     if (soundNew()) { NS.play('notify', kind); return; }
     playNoteSequence([
@@ -4142,7 +4216,8 @@
     ]);
   }
 
-  function playEndGameJingle(finalScore) {
+  function playEndGameJingle(finalScore, noHaptic) {
+    if (!noHaptic) haptic(finalScore <= 4 ? 'jingleLow' : (finalScore <= 9 ? 'jingleMid' : 'jingleHigh'));
     if (!appSettings.audio) return;
     if (soundNew()) { NS.play(finalScore <= 4 ? 'jingleLow' : (finalScore <= 9 ? 'jingleMid' : 'jingleHigh')); return; }
     if (finalScore <= 4) {
@@ -4175,7 +4250,8 @@
     }
   }
 
-  function playGenerateSound() {
+  function playGenerateSound(noHaptic) {
+    if (!noHaptic) haptic('newWord');
     if (!appSettings.audio) return;
     if (soundNew()) { NS.play('newWord'); return; }
     try {
@@ -4203,6 +4279,7 @@
   }
 
   function playAnswerTimeUpSound() {
+    haptic('answerUp');
     if (!appSettings.audio) return;
     if (soundNew()) { NS.play('answerUp'); return; }
     try {
@@ -4668,7 +4745,6 @@
         answerTimerInterval = null;
         answerTimerEl.hidden = true;
         playAnswerTimeUpSound();
-        vibrate(300);
       } else {
         answerTimerValueEl.textContent = remaining;
       }
@@ -4711,7 +4787,6 @@
         }
         enterPendingEndOfGame();
         playTimeUpSound();
-        vibrate([60, 60, 60]);
       }
       updateTimerDisplay();
     }, 1000);
@@ -4804,7 +4879,6 @@
     enterScoringPhase();
     recordWordEnd();
     playStopSound();
-    vibrate(50);
     startAnswerTimer();
   });
 
@@ -4923,7 +4997,7 @@
   vibrationToggleEl.addEventListener('change', function () {
     appSettings.vibration = vibrationToggleEl.checked;
     saveSettings();
-    if (appSettings.vibration) vibrate(20);
+    haptic('tick'); // anteprima: si sente subito com'è
   });
   textSizeEl.addEventListener('input', function () {
     appSettings.textScale = parseInt(textSizeEl.value, 10) / 100;
@@ -4979,7 +5053,6 @@
     stopAnswerTimer();
     recordWordStart();
     playGenerateSound();
-    vibrate(25);
   });
 
   document.getElementById('btn-double').addEventListener('click', function () {
@@ -4996,7 +5069,6 @@
     stopAnswerTimer();
     recordWordStart();
     playDoubleSound();
-    vibrate(25);
   });
 
   // ---------- parole fisse sullo sfondo della splash ----------
