@@ -303,6 +303,7 @@
   }
 
 
+  body.menu-active #view-play { visibility: hidden; }
   .view { display: none; flex: 1 1 auto; min-height: 0; flex-direction: column; gap: clamp(6px, 1.4vh, 10px); }
   .view.active { display: flex; }
   #view-words.active { overflow-y: auto; }
@@ -621,9 +622,15 @@
     backdrop-filter: blur(7px);
     -webkit-backdrop-filter: blur(7px);
   }
+  /* I menu (e il loro sfondo) coprono SEMPRE tutto lo schermo: prima partivano da un margine che in partita
+     veniva ricalcolato, lasciando scoperta una fascia in alto da cui si intravedeva la schermata di gioco. */
+  #top-mode-overlay, #mode-overlay, #challenge-teamcount-overlay, #challenge-names-overlay {
+    top: 0;
+    padding-top: 26px;
+  }
   #menu-backdrop {
     position: fixed;
-    top: var(--overlay-top, 0px);
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -2568,8 +2575,8 @@
   var pendingOverlayId = 'top-mode-overlay';
 
   var menuBackdropEl = document.getElementById('menu-backdrop');
-  function showMenuBackdrop() { menuBackdropEl.style.display = 'block'; }
-  function hideMenuBackdrop() { menuBackdropEl.style.display = 'none'; }
+  function showMenuBackdrop() { menuBackdropEl.style.display = 'block'; document.body.classList.add('menu-active'); }
+  function hideMenuBackdrop() { menuBackdropEl.style.display = 'none'; document.body.classList.remove('menu-active'); }
 
   function hideAllSetupOverlays() {
     topModeOverlayEl.style.display = 'none';
