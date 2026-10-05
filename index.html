@@ -51,6 +51,8 @@
     --stage-border: #C8D0F3;
     --stage-overlay: rgba(16, 22, 60, 0.08);
     --stage-placeholder: rgba(16, 22, 60, 0.42);
+    --stage-glow: rgba(29, 114, 224, 0.16);
+    --passo-icon-fg: #FFFFFF;
     --wash-blue: rgba(29, 114, 224, 0.10);
     --wash-green: rgba(47, 174, 96, 0.10);
     --wash-orange: rgba(242, 153, 74, 0.12);
@@ -86,6 +88,8 @@
       --stage-border: #242D52;
       --stage-overlay: rgba(255, 255, 255, 0.14);
       --stage-placeholder: rgba(238, 241, 253, 0.48);
+      --stage-glow: rgba(79, 156, 255, 0.20);
+      --passo-icon-fg: #06122A;
       --wash-blue: rgba(79, 156, 255, 0.28);
       --wash-green: rgba(63, 208, 122, 0.26);
       --wash-orange: rgba(255, 169, 77, 0.26);
@@ -121,6 +125,8 @@
     --stage-border: #242D52;
     --stage-overlay: rgba(255, 255, 255, 0.14);
     --stage-placeholder: rgba(238, 241, 253, 0.48);
+    --stage-glow: rgba(79, 156, 255, 0.20);
+    --passo-icon-fg: #06122A;
     --wash-blue: rgba(79, 156, 255, 0.28);
     --wash-green: rgba(63, 208, 122, 0.26);
     --wash-orange: rgba(255, 169, 77, 0.26);
@@ -1563,6 +1569,193 @@
   .results-row.rank-1 .results-score { font-size: 34px; }
   .results-row.rank-2 .results-rank { background: #B9C4D0; color: #243040; box-shadow: none; }
   .results-row.rank-3 .results-rank { background: #CF8F62; color: #3A1D08; box-shadow: none; }
+
+  /* =====================================================================
+     SCHERMATA DI GIOCO: aspetto rimodellato (stessa impostazione di resoconti e impostazioni).
+     Blocco unico e separato: per tornare al vecchio aspetto basta toglierlo.
+     ===================================================================== */
+  .mode-indicator {
+    align-self: center;
+    background: var(--wash-blue);
+    color: var(--blue-dark);
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+  }
+
+  /* --- punteggio --- */
+  .score-hero, .tiebreak-target-banner {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--green);
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0) 55%, rgba(0,0,0,0.07) 100%);
+    border-radius: 22px;
+    padding: clamp(8px, 1.6vh, 13px) 20px;
+    box-shadow: 0 14px 26px -14px rgba(47, 174, 96, 0.75), inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .score-hero .label { font-size: clamp(25px, 7.2vw, 36px); letter-spacing: 0.06em; opacity: 0.78; }
+  .score-hero .value {
+    font-size: clamp(38px, 11vw, 58px);
+    transform-origin: right center;
+    font-variant-numeric: tabular-nums;
+  }
+  .score-hero .value.bump { animation: scoreBump 0.38s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes scoreBump { 0% { transform: scale(1); } 40% { transform: scale(1.28); } 100% { transform: scale(1); } }
+
+  /* --- passo e raddoppi --- */
+  .mini-stats { gap: 8px; }
+  .stat {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    border: none;
+    border-radius: 18px;
+    padding: clamp(6px, 1.3vh, 10px) 12px;
+    background: var(--panel);
+    box-shadow: 0 10px 20px -14px var(--shadow), inset 0 0 0 1px var(--border);
+  }
+  .stat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 11px;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stat-icon svg { width: 17px; height: 17px; display: block; }
+  .stat.passi .stat-icon { background: var(--blue); color: var(--passo-icon-fg); }
+  .stat.raddoppi .stat-icon { background: var(--orange); color: #1B1300; }
+  .stat.exhausted .stat-icon { background: var(--red); color: #fff; }
+  .stat-text { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; gap: 0; }
+  .stat .value { font-size: clamp(22px, 6vw, 30px); }
+
+  .team-name-banner {
+    border: none;
+    border-radius: 20px;
+    background: rgba(242, 153, 74, 0.16);
+    box-shadow: inset 0 0 0 1.5px rgba(242, 153, 74, 0.45);
+  }
+
+  /* --- zona parola e tempo --- */
+  .stage {
+    border-radius: 28px;
+    background-color: var(--stage-bg);
+    background-image: radial-gradient(120% 55% at 50% 0%, var(--stage-glow) 0%, rgba(0,0,0,0) 72%);
+    box-shadow: 0 24px 44px -26px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .timer { letter-spacing: 0.02em; text-shadow: 0 8px 26px var(--stage-glow); }
+  .timer-bar {
+    height: 10px;
+    max-width: 300px;
+    border-radius: 999px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.14);
+  }
+  .timer-bar-fill {
+    border-radius: 999px;
+    background-image: linear-gradient(90deg, #6AB0FF, #1D72E0);
+  }
+  .timer-bar-fill.low { background-image: linear-gradient(90deg, #FFC38A, #F2994A); }
+  .double-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    padding: 4px 12px 4px 9px;
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0));
+    box-shadow: 0 8px 16px -8px rgba(242, 153, 74, 0.8);
+  }
+  .double-badge svg { width: 12px; height: 12px; display: block; }
+  .answer-timer-label {
+    background: var(--red);
+    color: #fff;
+    font-size: 16px;
+    padding: 7px 18px;
+    box-shadow: 0 10px 18px -10px rgba(224, 59, 59, 0.85);
+  }
+  .answer-timer-bar { height: 6px; border-radius: 999px; }
+  .answer-timer-bar-fill { background-image: linear-gradient(90deg, #FF8A8A, #E03B3B); }
+
+  /* --- pulsanti --- */
+  button.btn {
+    border-radius: 16px;
+    font-weight: 800;
+    box-shadow: 0 10px 18px -12px var(--shadow);
+  }
+  button.btn.primary, button.btn.double, button.btn.stop {
+    border: none;
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 62%);
+  }
+  button.btn.primary { box-shadow: 0 14px 22px -12px rgba(29, 114, 224, 0.8), inset 0 1px 0 rgba(255,255,255,0.3); }
+  button.btn.double { box-shadow: 0 14px 22px -12px rgba(242, 153, 74, 0.85), inset 0 1px 0 rgba(255,255,255,0.35); }
+  button.btn.stop { box-shadow: 0 14px 24px -12px rgba(224, 59, 59, 0.85), inset 0 1px 0 rgba(255,255,255,0.3); }
+  #view-play.stop-mode #row-running .btn.stop { box-shadow: 0 18px 32px -14px rgba(224, 59, 59, 0.85), inset 0 1px 0 rgba(255,255,255,0.3); }
+  button.btn.primary::before, button.btn.double::before {
+    content: '';
+    display: inline-block;
+    width: 17px;
+    height: 17px;
+    margin-right: 7px;
+    vertical-align: -3px;
+    background: currentColor;
+    -webkit-mask: center / contain no-repeat;
+    mask: center / contain no-repeat;
+  }
+  button.btn.primary::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='3.5' width='17' height='17' rx='4.5'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.1' fill='black'/%3E%3Ccircle cx='15.5' cy='15.5' r='1.1' fill='black'/%3E%3Ccircle cx='12' cy='12' r='1.1' fill='black'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='3.5' width='17' height='17' rx='4.5'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.1' fill='black'/%3E%3Ccircle cx='15.5' cy='15.5' r='1.1' fill='black'/%3E%3Ccircle cx='12' cy='12' r='1.1' fill='black'/%3E%3C/svg%3E"); }
+  button.btn.double::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2 4 14h6l-1 8 9-12h-6z' fill='black'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2 4 14h6l-1 8 9-12h-6z' fill='black'/%3E%3C/svg%3E"); }
+  button.btn.plus { background: rgba(47, 174, 96, 0.14); color: var(--chip-green); border: 1.5px solid rgba(47, 174, 96, 0.5); box-shadow: none; }
+  button.btn.minus { background: rgba(224, 59, 59, 0.12); color: var(--chip-red); border: 1.5px solid rgba(224, 59, 59, 0.45); box-shadow: none; }
+  button.btn.neutral { background: var(--panel-2); color: var(--text-dim); border: 1.5px solid var(--border); box-shadow: none; }
+  button.btn.reset-all { background: transparent; border: 1.5px solid var(--border); box-shadow: none; }
+
+  /* schermi bassi: versione più compatta, per non togliere spazio a timer e parola */
+  @media (max-height: 680px) {
+    .score-hero .value { font-size: clamp(32px, 9vw, 44px); }
+    .score-hero .label { font-size: clamp(22px, 6vw, 29px); }
+    .stat { gap: 8px; padding: 5px 10px; }
+    .stat-icon { width: 28px; height: 28px; border-radius: 9px; }
+    .stat-icon svg { width: 15px; height: 15px; }
+    .stat .value { font-size: clamp(20px, 5.4vw, 26px); }
+    .answer-timer-label { padding: 5px 16px; font-size: 15px; }
+  }
+
+  /* =====================================================================
+     TRANSIZIONI tra le schermate: dissolvenza incrociata tra i menu e "accoglienza" all'avvio della partita
+     ===================================================================== */
+  @keyframes menuIn { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
+  @keyframes menuOut { to { opacity: 0; transform: translateY(-10px) scale(0.985); } }
+  @keyframes backdropIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes backdropOut { to { opacity: 0; } }
+  @keyframes gameDrop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+  @keyframes gameRise { from { opacity: 0; transform: translateY(18px) scale(0.985); } to { opacity: 1; transform: none; } }
+
+  /* il contenuto di ogni menu entra con un leggero ritardo, quando il precedente sta già sfumando */
+  #top-mode-overlay > *, #mode-overlay > *, #challenge-teamcount-overlay > *, #challenge-names-overlay > * {
+    animation: menuIn 0.46s cubic-bezier(.22,.85,.3,1) 0.1s backwards;
+  }
+  #top-mode-overlay.menu-leave, #mode-overlay.menu-leave, #challenge-teamcount-overlay.menu-leave, #challenge-names-overlay.menu-leave { pointer-events: none; }
+  #top-mode-overlay.menu-leave > *, #mode-overlay.menu-leave > *, #challenge-teamcount-overlay.menu-leave > *, #challenge-names-overlay.menu-leave > * {
+    animation: menuOut 0.24s ease forwards;
+  }
+  #menu-backdrop { animation: backdropIn 0.5s ease backwards; }
+  #menu-backdrop.backdrop-out { animation: backdropOut 0.55s ease forwards; pointer-events: none; }
+
+  /* avvio della partita: gli elementi entrano uno dopo l'altro */
+  #view-play.game-enter .scoreboard { animation: gameDrop 0.55s cubic-bezier(.22,.85,.3,1) 0.12s backwards; }
+  #view-play.game-enter .stage { animation: gameRise 0.6s cubic-bezier(.22,.85,.3,1) 0.22s backwards; }
+  #view-play.game-enter #row-idle { animation: gameRise 0.5s cubic-bezier(.22,.85,.3,1) 0.36s backwards; }
+  #view-play.game-enter #score-row { animation: gameRise 0.5s cubic-bezier(.22,.85,.3,1) 0.44s backwards; }
+  #view-play.game-enter #row-reset { animation: gameRise 0.5s cubic-bezier(.22,.85,.3,1) 0.52s backwards; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #top-mode-overlay > *, #mode-overlay > *, #challenge-teamcount-overlay > *, #challenge-names-overlay > *,
+    #menu-backdrop, #view-play.game-enter .scoreboard, #view-play.game-enter .stage, #view-play.game-enter #row-idle,
+    #view-play.game-enter #score-row, #view-play.game-enter #row-reset { animation-duration: 0.01ms !important; animation-delay: 0s !important; }
+  }
 </style>
 </head>
 <body>
@@ -1600,12 +1793,18 @@
       </div>
       <div class="mini-stats">
         <div class="stat passi" id="stat-passi">
-          <span class="label" id="passi-label">Passo a disposizione</span>
-          <span class="value" id="passi-value">3</span>
+          <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+          <span class="stat-text">
+            <span class="label" id="passi-label">Passo a disposizione</span>
+            <span class="value" id="passi-value">3</span>
+          </span>
         </div>
         <div class="stat raddoppi" id="stat-raddoppi">
-          <span class="label" id="raddoppi-label">Raddoppi</span>
-          <span class="value" id="raddoppi-value">2</span>
+          <span class="stat-icon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span>
+          <span class="stat-text">
+            <span class="label" id="raddoppi-label">Raddoppi</span>
+            <span class="value" id="raddoppi-value">2</span>
+          </span>
         </div>
       </div>
     </div>
@@ -1614,7 +1813,7 @@
       <div class="center-notice" id="center-notice"></div>
       <div class="timer" id="timer-value">60</div>
       <div class="timer-bar"><div class="timer-bar-fill" id="timer-bar-fill"></div></div>
-      <div class="double-badge" id="double-badge" hidden>RADDOPPIO</div>
+      <div class="double-badge" id="double-badge" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>RADDOPPIO</div>
       <div class="word-box" id="word-box">
         <div class="placeholder">Premi «Nuova parola» per iniziare la partita</div>
       </div>
@@ -1769,7 +1968,7 @@
       </section>
       <section class="howto-section">
         <div class="howto-section-head"><span class="settings-icon ic-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span><h3>Raddoppio</h3></div>
-        <p>Se il punteggio della squadra è di almeno 2 punti, i tre giocatori possono accordarsi sul tentare un raddoppio. La posta in palio aumenta, garantendo +2 punti in caso di successo o −2 in caso il terzo giocatore dovesse sbagliare. Si hanno 2 raddoppi a disposizione per ogni partita. Il passo è utilizzabile anche con i raddoppi.</p>
+        <p>Se il punteggio della squadra è di almeno 2 punti, i tre giocatori possono accordarsi sul tentare un raddoppio. Il raddoppio consiste sempre in una parola misteriosa formata da almeno 2 vocaboli <em>(es. TORRE DI PISA)</em>. La posta in palio aumenta, garantendo +2 punti in caso di successo o −2 in caso il terzo giocatore dovesse sbagliare. Si hanno 2 raddoppi a disposizione per ogni manche. Il passo è utilizzabile anche con i raddoppi.</p>
       </section>
       <section class="howto-section">
         <div class="howto-section-head"><span class="settings-icon ic-yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a2 2 0 0 0 0 4h1"/><path d="M17 6h3a2 2 0 0 1 0 4h-1"/></svg></span><h3>Modalità di gioco</h3></div>
@@ -2417,7 +2616,12 @@
   var statPassiEl = document.getElementById('stat-passi');
   var statRaddoppiEl = document.getElementById('stat-raddoppi');
 
-  function updateScoreDisplay() { scoreValueEl.textContent = score; updateDoubleButtonState(); }
+  function updateScoreDisplay() {
+    scoreValueEl.textContent = score;
+    // piccolo rimbalzo del numero quando il punteggio cambia
+    scoreValueEl.classList.remove('bump'); void scoreValueEl.offsetWidth; scoreValueEl.classList.add('bump');
+    updateDoubleButtonState();
+  }
   function updatePassiDisplay() {
     passiValueEl.textContent = passi;
     if (!pendingEndOfGame) btnPassoEl.textContent = passi > 0 ? 'PASSO' : 'PASSO ESAURITI';
@@ -2450,7 +2654,16 @@
   var scoreLockUntil = 0;
 
   // Fase "si gioca": Nuova parola / Raddoppio disponibili, punteggio e passo bloccati. RESET disponibile.
+  // "Come si gioca?" e Impostazioni si possono aprire SOLO tra una parola e l'altra (quando si può premere
+  // "Nuova parola", "Raddoppio" o "Parola per lo spareggio"): non mentre la parola è in corso né mentre si
+  // assegna il punteggio (quando i pulsanti punteggio/passo sono attivi), per non perdere di vista la partita.
+  function setHelpButtonsEnabled(on) {
+    if (btnHowtoEl) btnHowtoEl.disabled = !on;
+    if (btnSettingsEl) btnSettingsEl.disabled = !on;
+  }
+
   function enterPlayPhase() {
+    setHelpButtonsEnabled(true);
     playPhaseEnabled = true;
     updateNewWordButtonState();
     updateDoubleButtonState();
@@ -2470,6 +2683,7 @@
   // finché non si assegna il punteggio (o il passo) non si può azzerare la partita.
   function enterScoringPhase() {
     scoreLockUntil = Date.now() + PROTECT_MS;
+    setHelpButtonsEnabled(false);
     playPhaseEnabled = false;
     updateNewWordButtonState();
     updateDoubleButtonState();
@@ -2575,30 +2789,95 @@
   var pendingOverlayId = 'top-mode-overlay';
 
   var menuBackdropEl = document.getElementById('menu-backdrop');
-  function showMenuBackdrop() { menuBackdropEl.style.display = 'block'; document.body.classList.add('menu-active'); }
-  function hideMenuBackdrop() { menuBackdropEl.style.display = 'none'; document.body.classList.remove('menu-active'); }
+  var menuActiveTimer = null, backdropOutTimer = null, welcomeTimer = null;
+  var leaveTimers = {};
 
+  function showMenuBackdrop() {
+    clearTimeout(backdropOutTimer);
+    menuBackdropEl.classList.remove('backdrop-out');
+    menuBackdropEl.style.display = 'block';
+    // Il gioco dietro viene nascosto solo a dissolvenza in entrata finita: così, tornando al menu
+    // da una partita, la schermata di gioco sfuma invece di sparire di colpo.
+    if (!document.body.classList.contains('menu-active')) {
+      clearTimeout(menuActiveTimer);
+      menuActiveTimer = setTimeout(function () { document.body.classList.add('menu-active'); }, 520);
+    }
+    setHelpButtonsEnabled(true);
+  }
+  function hideMenuBackdrop() {
+    clearTimeout(menuActiveTimer);
+    clearTimeout(backdropOutTimer);
+    menuBackdropEl.classList.remove('backdrop-out');
+    menuBackdropEl.style.display = 'none';
+    document.body.classList.remove('menu-active');
+  }
+  // Verso la partita: lo sfondo del menu si dissolve e rivela il gioco che sta sotto.
+  function dissolveMenuBackdrop() {
+    clearTimeout(menuActiveTimer);
+    document.body.classList.remove('menu-active'); // la partita torna visibile sotto lo sfondo che sfuma
+    menuBackdropEl.classList.add('backdrop-out');
+    clearTimeout(backdropOutTimer);
+    backdropOutTimer = setTimeout(function () {
+      menuBackdropEl.style.display = 'none';
+      menuBackdropEl.classList.remove('backdrop-out');
+    }, 580);
+  }
+  // Ingresso a scalini degli elementi della schermata di gioco.
+  function playGameWelcome() {
+    var v = document.getElementById('view-play');
+    v.classList.remove('game-enter');
+    void v.offsetWidth;
+    v.classList.add('game-enter');
+    clearTimeout(welcomeTimer);
+    welcomeTimer = setTimeout(function () { v.classList.remove('game-enter'); }, 1300);
+  }
+
+  var menuOverlayEls = [topModeOverlayEl, modeOverlayEl, teamcountOverlayEl, namesOverlayEl];
+  function cancelLeave(el) { clearTimeout(leaveTimers[el.id]); el.classList.remove('menu-leave'); }
+  // Istantaneo (usato quando non serve nessun passaggio visivo)
   function hideAllSetupOverlays() {
-    topModeOverlayEl.style.display = 'none';
-    modeOverlayEl.style.display = 'none';
-    teamcountOverlayEl.style.display = 'none';
-    namesOverlayEl.style.display = 'none';
+    menuOverlayEls.forEach(function (el) { cancelLeave(el); el.style.display = 'none'; });
     resultsOverlayEl.style.display = 'none';
   }
-  function showTopModeOverlay() { hideAllSetupOverlays(); showMenuBackdrop(); topModeOverlayEl.style.display = 'flex'; pendingOverlayId = 'top-mode-overlay'; }
-  function showModeOverlay() {
-    hideAllSetupOverlays();
+  // Dolce: il menu attuale sfuma mentre entra il successivo
+  function softHideMenuOverlays(except) {
+    menuOverlayEls.forEach(function (el) {
+      if (el === except) return;
+      if (getComputedStyle(el).display === 'none' || el.classList.contains('menu-leave')) return;
+      el.classList.add('menu-leave');
+      leaveTimers[el.id] = setTimeout(function () { el.style.display = 'none'; el.classList.remove('menu-leave'); }, 250);
+    });
+    resultsOverlayEl.style.display = 'none';
+  }
+  function openMenuOverlay(el) {
+    softHideMenuOverlays(el);
     showMenuBackdrop();
+    cancelLeave(el);
+    el.style.display = 'flex';
+  }
+  function showTopModeOverlay() { openMenuOverlay(topModeOverlayEl); pendingOverlayId = 'top-mode-overlay'; }
+  function showModeOverlay() {
     // Ogni volta che si apre il menu difficoltà, "Classica" torna al centro
     // (Facile a sinistra, Difficile a destra), anche se l'ultima volta si era scelta un'altra.
     if (difficultyCarousel) difficultyCarousel.resetToStart();
-    modeOverlayEl.style.display = 'flex';
+    openMenuOverlay(modeOverlayEl);
     pendingOverlayId = 'mode-overlay';
   }
-  function showTeamcountOverlay() { hideAllSetupOverlays(); showMenuBackdrop(); teamcountOverlayEl.style.display = 'flex'; pendingOverlayId = 'challenge-teamcount-overlay'; }
-  function showNamesOverlay() { hideAllSetupOverlays(); showMenuBackdrop(); namesOverlayEl.style.display = 'flex'; pendingOverlayId = 'challenge-names-overlay'; }
-  function showResultsOverlay() { renderResultsList(); hideAllSetupOverlays(); hideMenuBackdrop(); resultsOverlayEl.style.display = 'flex'; pendingOverlayId = 'challenge-results-overlay'; }
-  function enterGameplay() { hideAllSetupOverlays(); hideMenuBackdrop(); pendingOverlayId = null; }
+  function showTeamcountOverlay() { openMenuOverlay(teamcountOverlayEl); pendingOverlayId = 'challenge-teamcount-overlay'; }
+  function showNamesOverlay() { openMenuOverlay(namesOverlayEl); pendingOverlayId = 'challenge-names-overlay'; }
+  function showResultsOverlay() { setHelpButtonsEnabled(true); renderResultsList(); hideAllSetupOverlays(); hideMenuBackdrop(); resultsOverlayEl.style.display = 'flex'; pendingOverlayId = 'challenge-results-overlay'; }
+  function enterGameplay() {
+    var fromMenu = menuBackdropEl.style.display === 'block' && !menuBackdropEl.classList.contains('backdrop-out');
+    if (fromMenu) {
+      softHideMenuOverlays(null);   // il menu sfuma
+      dissolveMenuBackdrop();       // lo sfondo si dissolve
+      playGameWelcome();            // il gioco "accoglie" i giocatori
+    } else {
+      hideAllSetupOverlays();
+      hideMenuBackdrop();
+    }
+    pendingOverlayId = null;
+  }
 
   function updateModeLabel() {
     if (!gameMode) {
@@ -2816,7 +3095,7 @@
       render(dragDeltaX / 2);
     });
     document.addEventListener('keydown', function (e) {
-      if (track.getClientRects().length === 0) return; // menu non visibile
+      if (track.getClientRects().length === 0 || track.closest('.menu-leave')) return; // menu non visibile o in dissolvenza
       if (!menuKeysAllowed()) return;
       // Invio = preme la carta in primo piano (quella al centro)
       if (e.key === 'Enter') {
@@ -2947,9 +3226,10 @@
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
     if (!menuKeysAllowed()) return;
     var backId = null;
-    if (modeOverlayEl.style.display === 'flex') backId = 'btn-back-mode';
-    else if (teamcountOverlayEl.style.display === 'flex') backId = 'btn-back-teamcount';
-    else if (namesOverlayEl.style.display === 'flex') backId = 'btn-back-names';
+    var shown = function (el) { return el.style.display === 'flex' && !el.classList.contains('menu-leave'); };
+    if (shown(modeOverlayEl)) backId = 'btn-back-mode';
+    else if (shown(teamcountOverlayEl)) backId = 'btn-back-teamcount';
+    else if (shown(namesOverlayEl)) backId = 'btn-back-names';
     if (!backId) return;
     e.preventDefault();
     document.getElementById(backId).click();
@@ -3825,6 +4105,7 @@
   }
 
   function showEndGameScreen() {
+    setHelpButtonsEnabled(true);
     var avg = wordTimes.length ? (wordTimes.reduce(function (a, b) { return a + b; }, 0) / wordTimes.length) : null;
     animateCount(document.getElementById('endgame-score'), score);
     document.getElementById('endgame-avg-time').textContent = avg === null ? '—' : avg.toFixed(1).replace('.', ',') + ' s';
@@ -3987,11 +4268,11 @@
   // Altezza del grande STOP = quattro righe di pulsanti: la riga "Nuova parola/Raddoppio", quella dei
   // punteggi, il RESET e una riga in più sopra (che sottrae un po' di spazio alla zona parola/tempo).
   function measureStopZone() {
-    var idle = rowIdle.getBoundingClientRect();
-    var reset = rowResetEl.getBoundingClientRect();
-    if (!idle.height || !reset.height) return stopZoneHeight; // righe nascoste: tengo l'ultima misura
+    // offsetTop/offsetHeight (e non getBoundingClientRect) per non essere influenzati
+    // dalle animazioni di ingresso delle righe all'inizio della partita
+    if (!rowIdle.offsetHeight || !rowResetEl.offsetHeight) return stopZoneHeight; // righe nascoste: tengo l'ultima misura
     var gap = parseFloat(getComputedStyle(viewPlayEl).rowGap) || 8;
-    stopZoneHeight = Math.round(reset.bottom - idle.top + idle.height + gap);
+    stopZoneHeight = Math.round((rowResetEl.offsetTop + rowResetEl.offsetHeight) - rowIdle.offsetTop + rowIdle.offsetHeight + gap);
     return stopZoneHeight;
   }
   function showIdleRow() {
@@ -3999,8 +4280,7 @@
     rowRunning.style.height = '';
     rowIdle.style.display = '';
     rowRunning.style.display = 'none';
-    btnHowtoEl.disabled = false;
-    btnSettingsEl.disabled = false;
+    // (aiuto e impostazioni: li gestiscono enterPlayPhase / enterScoringPhase)
   }
   function showRunningRow() {
     var h = measureStopZone(); // va misurata prima di nascondere le righe
