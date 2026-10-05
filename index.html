@@ -1819,6 +1819,29 @@
   #view-play.stop-mode #row-running .btn.stop {
     box-shadow: 0 18px 32px -14px rgba(190, 45, 45, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.22);
   }
+
+  /* messaggio aperto: pulsanti di gioco bloccati e senza pulsazione */
+  .btn-grid { transition: opacity 0.2s ease; }
+  #view-play.notice-lock .btn-grid { pointer-events: none; opacity: 0.6; }
+  #view-play.notice-lock button.btn.pulse { animation: none; box-shadow: none; transform: none; }
+
+  /* tessere "esaurito": le due righe stanno al centro e la tessera non cambia altezza */
+  .stat.exhausted .label { line-height: 1.1; text-align: left; }
+  .stat.exhausted .stat-text { justify-content: center; }
+
+  /* il testo del gioco non si può evidenziare (su telefono il tocco prolungato apriva la selezione e
+     le ricerche di Google); restano selezionabili solo i campi dove si scrive */
+  html, body {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  /* anche il logo: niente menu "salva immagine" con il tocco prolungato */
+  .topbar-logo, #splash-screen img { pointer-events: none; -webkit-user-drag: none; }
 </style>
 </head>
 <body>
@@ -2480,19 +2503,36 @@
     passo:     ['ic-blue',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>'],
     raddoppio: ['ic-orange', '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>']
   };
+  // Finché un messaggio al centro è visibile i pulsanti di gioco sono bloccati (non premibili, non pulsano):
+  // altrimenti si può premere "Nuova parola" con la finestrella ancora aperta. Tornano attivi quando scompare.
+  var noticeLocked = false;
+  var noticeUnlockTimer = null;
+  function setNoticeLock(on) {
+    noticeLocked = on;
+    var v = document.getElementById('view-play');
+    if (v) v.classList.toggle('notice-lock', on);
+  }
+  function releaseNoticeLock() {
+    clearTimeout(noticeUnlockTimer);
+    // dopo la dissolvenza (0,25 s): così i pulsanti si riattivano solo quando la finestra è davvero sparita
+    noticeUnlockTimer = setTimeout(function () { setNoticeLock(false); }, 270);
+  }
   function showCenterNotice(html, variant, duration) {
+    clearTimeout(noticeUnlockTimer);
+    setNoticeLock(true);
     var ic = NOTICE_ICONS[variant];
     centerNoticeEl.innerHTML = (ic ? '<span class="cn-icon ' + ic[0] + '">' + ic[1] + '</span>' : '') + html;
     centerNoticeEl.className = 'center-notice show' + (variant ? ' ' + variant : '');
     clearTimeout(centerNoticeTimeout);
     if (duration !== 0) {
-      centerNoticeTimeout = setTimeout(function () { centerNoticeEl.classList.remove('show'); }, duration || 1700);
+      centerNoticeTimeout = setTimeout(function () { centerNoticeEl.classList.remove('show'); releaseNoticeLock(); }, duration || 1700);
     }
     playNotifySound();
   }
   function hideCenterNotice() {
     clearTimeout(centerNoticeTimeout);
     centerNoticeEl.classList.remove('show');
+    releaseNoticeLock();
   }
 
   // ---------- word bank factory ----------
@@ -2693,15 +2733,22 @@
     scoreValueEl.classList.remove('bump'); void scoreValueEl.offsetWidth; scoreValueEl.classList.add('bump');
     updateDoubleButtonState();
   }
+  // quando una tessera diventa "esaurito" ne blocco l'altezza, così il resto della schermata non si sposta
+  function holdStatHeight(el, exhausted) {
+    if (exhausted) { if (!el.classList.contains('exhausted') && !el.style.minHeight) el.style.minHeight = el.offsetHeight + 'px'; }
+    else el.style.minHeight = '';
+  }
   function updatePassiDisplay() {
+    holdStatHeight(statPassiEl, passi <= 0);
     passiValueEl.textContent = passi;
     if (!pendingEndOfGame) btnPassoEl.textContent = passi > 0 ? 'PASSO' : 'PASSO ESAURITI';
-    passiLabelEl.textContent = passi > 0 ? 'Passo a disposizione' : 'PASSO ESAURITI';
+    passiLabelEl.innerHTML = passi > 0 ? 'Passo a disposizione' : 'PASSO<br>ESAURITI';
     statPassiEl.classList.toggle('exhausted', passi <= 0);
   }
   function updateRaddoppiDisplay() {
+    holdStatHeight(statRaddoppiEl, raddoppiDisponibili <= 0);
     raddoppiValueEl.textContent = raddoppiDisponibili;
-    raddoppiLabelEl.textContent = raddoppiDisponibili > 0 ? 'Raddoppi' : 'RADDOPPI ESAURITI';
+    raddoppiLabelEl.innerHTML = raddoppiDisponibili > 0 ? 'Raddoppi' : 'RADDOPPI<br>ESAURITI';
     statRaddoppiEl.classList.toggle('exhausted', raddoppiDisponibili <= 0);
     updateDoubleButtonState();
   }
@@ -4334,6 +4381,9 @@
   var btnHowtoEl = document.getElementById('btn-howto');
   var btnSettingsEl = document.getElementById('btn-settings');
   var viewPlayEl = document.getElementById('view-play');
+  viewPlayEl.addEventListener('click', function (e) {
+    if (noticeLocked && e.target.closest && e.target.closest('.btn-grid')) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
   var rowResetEl = document.getElementById('row-reset');
   var stopZoneHeight = 0;
   // Altezza del grande STOP = quattro righe di pulsanti: la riga "Nuova parola/Raddoppio", quella dei
@@ -4644,6 +4694,7 @@
     if (howtoOverlayEl.style.display !== 'none') return;
     if (resetConfirmOverlayEl.style.display !== 'none') return;
     e.preventDefault();
+    if (noticeLocked) return; // messaggio aperto: i pulsanti sono bloccati
     if (rowRunning.style.display !== 'none') {
       document.getElementById('btn-stop').click();
     } else {
