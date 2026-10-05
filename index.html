@@ -1889,6 +1889,96 @@
     50% { box-shadow: 0 16px 28px -12px rgba(29, 114, 224, 0.85), 0 0 0 9px rgba(29, 114, 224, 0), inset 0 1px 0 rgba(255,255,255,0.3); }
   }
   @media (prefers-reduced-motion: reduce) { #splash-screen.splash-ready .splash-start { animation: none; } }
+
+  /* =====================================================================
+     SFIDA: carosello del punteggio. Scorrendo il blocco "nome squadra / punteggio" si vedono i punteggi
+     delle squadre già giocate; mentre se ne guarda una, la parte sotto è bloccata e oscurata.
+     ===================================================================== */
+  #view-play { position: relative; }
+  .sb-carousel { position: relative; flex: 0 0 auto; }
+  .sb-track {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    /* il padding evita che ombre e riflessi vengano tagliati; i margini negativi lo compensano */
+    padding: 8px 0 22px;
+    margin: -8px 0 -22px;
+  }
+  .sb-track::-webkit-scrollbar { display: none; }
+  .sb-track.sb-locked { overflow-x: hidden; }
+  .sb-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: center; scroll-snap-stop: always; }
+  .stat.sb-ok .stat-icon { background: var(--green); color: #0A2016; }
+  .stat.sb-ko .stat-icon { background: var(--red); color: #fff; }
+  .stat.sb-ok .value { color: var(--chip-green); }
+  .stat.sb-ko .value { color: var(--chip-red); }
+
+  .sb-nav {
+    position: absolute;
+    top: calc((var(--sb-banner-h, 54px) - 34px) / 2);
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(242, 153, 74, 0.45);
+    background: rgba(242, 153, 74, 0.2);
+    color: var(--orange-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+  .sb-nav[hidden] { display: none; }
+  .sb-nav-left { left: 10px; }
+  .sb-nav-right { right: 10px; }
+  .sb-nav svg { width: 18px; height: 18px; display: block; }
+  .sb-nav:active { transform: scale(0.92); }
+
+  .sb-dim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 160px;
+    z-index: 15;
+    border-radius: 28px;
+    background: rgba(8, 14, 26, 0.38);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #view-play.viewing-past .sb-dim { opacity: 1; pointer-events: auto; }
+  .sb-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 290px;
+    padding: 13px 18px;
+    border-radius: 22px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .sb-hint svg { width: 22px; height: 22px; flex: 0 0 auto; color: var(--blue); }
+  .sb-hint b { font-weight: 800; color: var(--orange-dark); text-transform: uppercase; }
 </style>
 </head>
 <body>
@@ -1920,7 +2010,9 @@
   <!-- ===== GIOCA ===== -->
   <section id="view-play" class="view active">
 
-    <div class="scoreboard">
+    <div class="sb-carousel" id="sb-carousel">
+      <div class="sb-track" id="sb-track">
+    <div class="scoreboard sb-slide" id="sb-current">
       <div class="team-name-banner" id="team-name-banner" hidden></div>
       <div class="tiebreak-target-banner" id="tiebreak-target-banner" hidden><span class="label">Tempo da battere</span><span class="value" id="tiebreak-target-value">-</span></div>
       <div class="score-hero">
@@ -1943,6 +2035,10 @@
           </span>
         </div>
       </div>
+    </div>
+      </div>
+      <button type="button" class="sb-nav sb-nav-left" id="sb-nav-left" aria-label="Squadra precedente" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+      <button type="button" class="sb-nav sb-nav-right" id="sb-nav-right" aria-label="Torna alla tua squadra" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
     </div>
 
     <div class="stage">
@@ -1978,6 +2074,8 @@
     <div class="btn-grid cols-1" id="row-reset">
       <button class="btn reset-all" id="btn-reset-timer">RESET</button>
     </div>
+
+    <div class="sb-dim" id="sb-dim" aria-hidden="true"><div class="sb-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m11 6-6 6 6 6"/></svg><span>Scorri a sinistra per tornare a <b id="sb-hint-name"></b></span></div></div>
   </section>
 
 
@@ -2904,6 +3002,7 @@
   function enterPlayPhase() {
     setHelpButtonsEnabled(true);
     playPhaseEnabled = true;
+    refreshScoreboardCarousel();
     updateNewWordButtonState();
     updateDoubleButtonState();
     minus1El.disabled = true;
@@ -2924,6 +3023,7 @@
     scoreLockUntil = Date.now() + PROTECT_MS;
     setHelpButtonsEnabled(false);
     playPhaseEnabled = false;
+    refreshScoreboardCarousel();
     updateNewWordButtonState();
     updateDoubleButtonState();
     minus1El.disabled = activeMode !== 'single';
@@ -3124,6 +3224,7 @@
   }
 
   function updateModeLabel() {
+    refreshScoreboardCarousel(); // il carosello dei punteggi esiste solo in Sfida
     if (!gameMode) {
       modeIndicatorEl.hidden = true;
       modeIndicatorEl.textContent = '';
@@ -3486,8 +3587,129 @@
     teamNameBannerEl.hidden = false;
     enterGameplay();
     resetRoundState({ keepPools: keepPools, playSound: false });
+    refreshScoreboardCarousel(true); // schede delle squadre già giocate, si parte dalla propria
     showCenterNotice('<span class="cn-title">' + escapeHtml(teamName.toUpperCase()) + '</span><span class="cn-sub">È IL VOSTRO TURNO</span>', 'turn', 3000);
   }
+
+
+  // ---------- Sfida: carosello del punteggio (punteggi delle squadre già giocate) ----------
+  // Ordine delle schede: [squadre già giocate..., squadra di turno]; si parte sempre dalla squadra di turno.
+  // Lo scorrimento è libero tra una parola e l'altra; durante una parola e mentre si assegna il punteggio è bloccato.
+  var sbTrack = document.getElementById('sb-track');
+  var sbNavL = document.getElementById('sb-nav-left');
+  var sbNavR = document.getElementById('sb-nav-right');
+  var sbDimEl = document.getElementById('sb-dim');
+  var sbHintNameEl = document.getElementById('sb-hint-name');
+  var sbViewEl = document.getElementById('view-play');
+  var sbPastCount = 0, sbSignature = '', sbSwipeAllowed = false, sbViewingPast = false, sbRaf = 0, sbLastIdx = 0;
+  var SB_ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  var SB_ICON_KO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+
+  function sbPastTeams() {
+    if (!challengeMode || tiebreakActive || !challengeTeamOrder || !challengeTeamOrder.length) return [];
+    var out = [];
+    for (var p = 0; p < challengeCurrentPos; p++) {
+      var t = challengeTeams[challengeTeamOrder[p]];
+      if (t) out.push(t);
+    }
+    return out;
+  }
+  function sbStatTile(cls, icon, label, value) {
+    var d = document.createElement('div');
+    d.className = 'stat ' + cls;
+    d.innerHTML = '<span class="stat-icon">' + icon + '</span><span class="stat-text"><span class="label"></span><span class="value"></span></span>';
+    d.querySelector('.label').textContent = label;
+    d.querySelector('.value').textContent = value;
+    return d;
+  }
+  function sbBuildPastSlide(team) {
+    var s = document.createElement('div');
+    s.className = 'scoreboard sb-slide sb-past';
+    var banner = document.createElement('div');
+    banner.className = 'team-name-banner';
+    banner.textContent = team.name;
+    var hero = document.createElement('div');
+    hero.className = 'score-hero';
+    hero.innerHTML = '<span class="label">Punteggio</span><span class="value"></span>';
+    hero.querySelector('.value').textContent = team.score;
+    var stats = document.createElement('div');
+    stats.className = 'mini-stats';
+    var r = team.recap || { correct: 0, wrong: 0 };
+    stats.appendChild(sbStatTile('sb-ok', SB_ICON_OK, 'Parole esatte', r.correct));
+    stats.appendChild(sbStatTile('sb-ko', SB_ICON_KO, 'Parole sbagliate', r.wrong));
+    s.appendChild(banner); s.appendChild(hero); s.appendChild(stats);
+    return s;
+  }
+  function sbScrollToCurrent() { sbTrack.scrollTo({ left: sbTrack.scrollWidth, behavior: 'auto' }); }
+  function sbIndex() { return Math.round(sbTrack.scrollLeft / (sbTrack.clientWidth || 1)); }
+  function sbGoTo(idx) {
+    idx = Math.max(0, Math.min(sbPastCount, idx));
+    sbTrack.scrollTo({ left: idx * sbTrack.clientWidth, behavior: 'smooth' });
+  }
+  function sbMeasure() {
+    var car = document.getElementById('sb-carousel');
+    var banner = document.getElementById('team-name-banner');
+    car.style.setProperty('--sb-banner-h', ((banner && !banner.hidden) ? banner.offsetHeight : 54) + 'px');
+    sbDimEl.style.top = (car.offsetTop + car.offsetHeight + 8) + 'px';
+  }
+  function sbUpdateNav() {
+    var idx = sbIndex();
+    sbNavL.hidden = !(sbSwipeAllowed && idx > 0);
+    sbNavR.hidden = !(sbSwipeAllowed && idx < sbPastCount);
+  }
+  function sbOnScrollNow() {
+    var max = sbTrack.scrollWidth - sbTrack.clientWidth;
+    var viewing = sbPastCount > 0 && (max - sbTrack.scrollLeft) > 8;
+    if (viewing !== sbViewingPast) {
+      sbViewingPast = viewing;
+      sbViewEl.classList.toggle('viewing-past', viewing);
+      if (viewing) { sbMeasure(); sbHintNameEl.textContent = teamNameBannerEl.textContent; }
+    }
+    var idx = sbIndex();
+    if (idx !== sbLastIdx) { sbLastIdx = idx; if (sbSwipeAllowed) { playSlideSound(); haptic('tick'); } }
+    sbUpdateNav();
+  }
+  function refreshScoreboardCarousel(force) {
+    if (!sbTrack) return;
+    var past = sbPastTeams();
+    var sig = past.map(function (t) { var r = t.recap || {}; return [t.name, t.score, r.correct, r.wrong].join('|'); }).join(';');
+    if (force || sig !== sbSignature) {
+      Array.prototype.slice.call(sbTrack.querySelectorAll('.sb-past')).forEach(function (n) { n.parentNode.removeChild(n); });
+      var cur = document.getElementById('sb-current');
+      past.forEach(function (t) { sbTrack.insertBefore(sbBuildPastSlide(t), cur); });
+      sbSignature = sig;
+      sbPastCount = past.length;
+      sbScrollToCurrent();
+      sbLastIdx = sbPastCount;
+    }
+    var running = document.getElementById('row-running').style.display !== 'none';
+    sbSwipeAllowed = sbPastCount > 0 && playPhaseEnabled && !running;
+    sbTrack.classList.toggle('sb-locked', !sbSwipeAllowed);
+    if (!sbSwipeAllowed) sbScrollToCurrent();
+    sbMeasure();
+    sbOnScrollNow();
+  }
+  sbTrack.addEventListener('scroll', function () {
+    if (sbRaf) return;
+    sbRaf = requestAnimationFrame(function () { sbRaf = 0; sbOnScrollNow(); });
+  }, { passive: true });
+  sbNavL.addEventListener('click', function () { if (!sbSwipeAllowed) return; haptic('tick'); sbGoTo(sbIndex() - 1); });
+  sbNavR.addEventListener('click', function () { if (!sbSwipeAllowed) return; haptic('tick'); sbGoTo(sbIndex() + 1); });
+  // frecce della tastiera per chi gioca da computer
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (!sbSwipeAllowed || pendingOverlayId || !menuKeysAllowed()) return;
+    var t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+    e.preventDefault();
+    sbGoTo(sbIndex() + (e.key === 'ArrowLeft' ? -1 : 1));
+  });
+  window.addEventListener('resize', function () {
+    if (!sbPastCount) return;
+    var idx = sbViewingPast ? sbIndex() : sbPastCount;
+    sbTrack.scrollTo({ left: idx * sbTrack.clientWidth, behavior: 'auto' });
+    sbMeasure();
+  });
 
   function captureCurrentTeamResult() {
     var avg = wordTimes.length ? (wordTimes.reduce(function (a, b) { return a + b; }, 0) / wordTimes.length) : null;
@@ -3547,6 +3769,7 @@
     minus1El.classList.remove('pulse');
     plus1El.classList.remove('pulse');
     tiebreakTargetBannerEl.hidden = true;
+    refreshScoreboardCarousel();
   }
 
   function startTiebreakStopwatch() {
@@ -4857,6 +5080,7 @@
     rowIdle.style.display = '';
     rowRunning.style.display = 'none';
     // (aiuto e impostazioni: li gestiscono enterPlayPhase / enterScoringPhase)
+    refreshScoreboardCarousel();
   }
   function showRunningRow() {
     var h = measureStopZone(); // va misurata prima di nascondere le righe
@@ -4869,6 +5093,7 @@
     // altrimenti si perde di vista timer e parola.
     btnHowtoEl.disabled = true;
     btnSettingsEl.disabled = true;
+    refreshScoreboardCarousel(); // durante la parola non si può scorrere
   }
 
   document.getElementById('btn-stop').addEventListener('click', function () {
@@ -5178,6 +5403,7 @@
     if (resetConfirmOverlayEl.style.display !== 'none') return;
     e.preventDefault();
     if (noticeLocked) return; // messaggio aperto: i pulsanti sono bloccati
+    if (sbViewingPast) return; // si sta guardando il punteggio di un'altra squadra: la partita è ferma
     if (rowRunning.style.display !== 'none') {
       document.getElementById('btn-stop').click();
     } else {
