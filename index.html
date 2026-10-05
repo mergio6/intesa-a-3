@@ -2084,6 +2084,13 @@
         <span class="switch-slider"></span>
       </label>
     </div>
+    <div class="settings-row settings-row-col">
+      <div class="settings-row-label"><span class="settings-icon ic-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>Stile dei suoni</div>
+      <div class="settings-theme-group" id="settings-soundstyle-group">
+        <button type="button" class="settings-theme-btn" data-sound-choice="new">Nuovi</button>
+        <button type="button" class="settings-theme-btn" data-sound-choice="classic">Originali</button>
+      </div>
+    </div>
     <div class="settings-row">
       <div class="settings-row-label"><span class="settings-icon ic-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="4" width="8" height="16" rx="2"/><path d="M3 10v4"/><path d="M21 10v4"/></svg></span><span>Vibrazione</span></div>
       <label class="switch">
@@ -2439,7 +2446,7 @@
   ];
 
   // ---------- impostazioni (audio/vibrazione/testo/tema) ----------
-  var appSettings = { audio: true, vibration: true, textScale: 1, theme: 'system' };
+  var appSettings = { audio: true, vibration: true, textScale: 1, theme: 'system', soundStyle: 'new' };
   function applyTextScale() {
     document.documentElement.style.setProperty('--game-text-scale', appSettings.textScale);
   }
@@ -2463,6 +2470,7 @@
         if (parsed.theme === 'light' || parsed.theme === 'dark' || parsed.theme === 'system') {
           appSettings.theme = parsed.theme;
         }
+        if (parsed.soundStyle === 'new' || parsed.soundStyle === 'classic') appSettings.soundStyle = parsed.soundStyle;
       }
     } catch (e) { /* restano i valori di default */ }
   }
@@ -2527,7 +2535,7 @@
     if (duration !== 0) {
       centerNoticeTimeout = setTimeout(function () { centerNoticeEl.classList.remove('show'); releaseNoticeLock(); }, duration || 1700);
     }
-    playNotifySound();
+    playNotifySound(variant);
   }
   function hideCenterNotice() {
     clearTimeout(centerNoticeTimeout);
@@ -2831,14 +2839,14 @@
       }
       if (delta > 0) {
         wordsCorrectCount++;
-        playPositiveSound();
+        playPositiveSound(delta);
         if (gameMode === 'classica') {
           streakCorrect++;
           if (streakCorrect >= 3) { forceNextDifficult = true; streakCorrect = 0; }
         }
       } else {
         wordsWrongCount++;
-        playNegativeSound();
+        playNegativeSound(delta);
         if (gameMode === 'classica') { forceNextEasy = true; streakCorrect = 0; }
       }
       if (raddoppiExhaustedPending) {
@@ -2983,7 +2991,7 @@
   }
   function showTeamcountOverlay() { openMenuOverlay(teamcountOverlayEl); pendingOverlayId = 'challenge-teamcount-overlay'; }
   function showNamesOverlay() { openMenuOverlay(namesOverlayEl); pendingOverlayId = 'challenge-names-overlay'; }
-  function showResultsOverlay() { setHelpButtonsEnabled(true); renderResultsList(); hideAllSetupOverlays(); hideMenuBackdrop(); resultsOverlayEl.style.display = 'flex'; pendingOverlayId = 'challenge-results-overlay'; }
+  function showResultsOverlay() { setHelpButtonsEnabled(true); renderResultsList(); hideAllSetupOverlays(); hideMenuBackdrop(); resultsOverlayEl.style.display = 'flex'; pendingOverlayId = 'challenge-results-overlay'; playResultsSound(); }
   function enterGameplay() {
     var fromMenu = menuBackdropEl.style.display === 'block' && !menuBackdropEl.classList.contains('backdrop-out');
     if (fromMenu) {
@@ -3193,7 +3201,7 @@
     // (la porta al centro se non lo è già) e conferma la scelta.
     function selectCard(i) {
       if (i !== activeIndex) { activeIndex = i; render(); }
-      playClickSound();
+      playSelectSound();
       if (onSelect) onSelect(cards[i].getAttribute('data-cmode'));
     }
     // Si può premere SOLO la carta al centro: toccare una carta laterale non fa nulla,
@@ -3325,15 +3333,15 @@
   });
 
   document.getElementById('btn-back-mode').addEventListener('click', function () {
-    playClickSound();
+    playBackSound();
     showTopModeOverlay();
   });
   document.getElementById('btn-back-teamcount').addEventListener('click', function () {
-    playClickSound();
+    playBackSound();
     showTopModeOverlay();
   });
   document.getElementById('btn-back-names').addEventListener('click', function () {
-    playClickSound();
+    playBackSound();
     showTeamcountOverlay();
   });
 
@@ -3580,7 +3588,7 @@
     tiebreakPendingElapsed = stopTiebreakStopwatch();
     showIdleRow();
     enterScoringPhase();
-    playAlertSound();
+    playStopSound();
     vibrate(50);
   }
 
@@ -3672,6 +3680,283 @@
 
   // ---------- suono di allarme ----------
   var sharedAudioCtx = null;
+
+  /*NS-START*/
+  // ===== MOTORE SONORO "NUOVO" =====
+  // Timbri morbidi (campane, marimba, soffi) con un leggero riverbero, tutti nella stessa scala
+  // (do maggiore pentatonica): così i suoni dell'app suonano come una famiglia e non come "bip" isolati.
+  var NS = (function () {
+    var N = {
+      C3: 130.81, C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00,
+      C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880.00, B5: 987.77,
+      C6: 1046.50, D6: 1174.66, E6: 1318.51, G6: 1567.98, A6: 1760.00, C7: 2093.00
+    };
+    var liveBus = null;
+
+    function makeNoise(ctx) {
+      var len = ctx.sampleRate;
+      var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      var d = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      return buf;
+    }
+    // coda di riverbero breve e morbida, generata al volo (nessun file)
+    function makeImpulse(ctx) {
+      var sr = ctx.sampleRate, len = Math.floor(sr * 0.55);
+      var buf = ctx.createBuffer(2, len, sr);
+      for (var ch = 0; ch < 2; ch++) {
+        var d = buf.getChannelData(ch), lp = 0;
+        for (var i = 0; i < len; i++) {
+          lp += ((Math.random() * 2 - 1) - lp) * 0.32;
+          d[i] = lp * Math.pow(1 - i / len, 2.6);
+        }
+      }
+      return buf;
+    }
+    // catena master: riverbero + compressore (evita saturazioni quando più suoni si sovrappongono) + taglio dei sibili
+    function makeBus(ctx, dest) {
+      var comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -16; comp.knee.value = 12; comp.ratio.value = 4;
+      comp.attack.value = 0.003; comp.release.value = 0.18;
+      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 9000; lp.Q.value = 0.5;
+      var master = ctx.createGain(); master.gain.value = 0.92;
+      var dry = ctx.createGain();
+      var wet = ctx.createGain();
+      var conv = ctx.createConvolver(); conv.buffer = makeImpulse(ctx);
+      var wetOut = ctx.createGain(); wetOut.gain.value = 0.9;
+      dry.connect(comp); wet.connect(conv); conv.connect(wetOut); wetOut.connect(comp);
+      comp.connect(lp); lp.connect(master); master.connect(dest);
+      return { ctx: ctx, dry: dry, wet: wet, noise: makeNoise(ctx) };
+    }
+
+    // --- strumenti di base ---
+    function tone(b, s) {
+      var ctx = b.ctx, t = s.t, a = s.a || 0.005;
+      var osc = ctx.createOscillator();
+      osc.type = s.type || 'sine';
+      osc.frequency.setValueAtTime(s.f, t);
+      if (s.f2) osc.frequency.exponentialRampToValueAtTime(s.f2, t + (s.glide || s.dur));
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(s.vol, t + a);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + s.dur);
+      osc.connect(g);
+      var out = g;
+      if (s.lp) { var f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = s.lp; g.connect(f); out = f; }
+      out.connect(b.dry);
+      if (s.send) { var sg = ctx.createGain(); sg.gain.value = s.send; out.connect(sg); sg.connect(b.wet); }
+      osc.start(t); osc.stop(t + s.dur + 0.03);
+    }
+    // campana "di vetro": fondamentale + parziali non armonici che si spengono più in fretta
+    function bell(b, f, t, vol, dur, send) {
+      var parts = [[1, 1, 1], [2.01, 0.42, 0.55], [2.76, 0.22, 0.4], [4.07, 0.09, 0.25]];
+      parts.forEach(function (p) {
+        tone(b, { t: t, f: f * p[0], dur: dur * p[2], vol: vol * p[1], a: 0.004, send: send || 0.2 });
+      });
+    }
+    // nota "pizzicata" (marimba/kalimba): morbida, con decadimento rapido
+    function pluck(b, f, t, vol, dur, lp, send) {
+      tone(b, { t: t, f: f, type: 'triangle', dur: dur, vol: vol, a: 0.003, lp: lp || 4200, send: send || 0.12 });
+      tone(b, { t: t, f: f * 2, type: 'sine', dur: dur * 0.6, vol: vol * 0.32, a: 0.003, send: send || 0.12 });
+    }
+    // soffio / "tick": rumore filtrato, con eventuale sweep del filtro
+    function noise(b, s) {
+      var ctx = b.ctx, t = s.t;
+      var src = ctx.createBufferSource(); src.buffer = b.noise;
+      var f = ctx.createBiquadFilter(); f.type = s.ftype || 'bandpass';
+      f.frequency.setValueAtTime(s.f, t);
+      if (s.f2) f.frequency.exponentialRampToValueAtTime(s.f2, t + s.dur);
+      f.Q.value = s.q || 1;
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(s.vol, t + (s.a || 0.004));
+      g.gain.exponentialRampToValueAtTime(0.0001, t + s.dur);
+      src.connect(f); f.connect(g); g.connect(b.dry);
+      if (s.send) { var sg = ctx.createGain(); sg.gain.value = s.send; g.connect(sg); sg.connect(b.wet); }
+      src.start(t, Math.random() * 0.4, s.dur + 0.03);
+    }
+    function thud(b, t, vol, f1, f2, dur) {
+      tone(b, { t: t, f: f1 || 180, f2: f2 || 55, glide: (dur || 0.15) * 0.8, dur: dur || 0.16, vol: vol, a: 0.003, send: 0.06 });
+    }
+
+    // "blip" digitale breve (onda quadra ammorbidita da un filtro): è il rumore di qualcosa che si genera
+    function blip(b, t, f, vol, dur, type, lp) {
+      tone(b, { t: t, f: f, type: type || 'square', dur: dur, vol: vol, a: 0.005, lp: lp || 2300, send: 0.04 });
+    }
+    // bip d'allarme: onda quadra + una seconda nota vicinissima (seconda minore) che dà la tensione da segnale d'avviso
+    function alarmBeep(b, t, f, dur, vol) {
+      tone(b, { t: t, f: f, type: 'square', dur: dur, vol: vol, a: 0.004, lp: 3200, send: 0.04 });
+      tone(b, { t: t, f: f * 1.059, type: 'square', dur: dur, vol: vol * 0.55, a: 0.004, lp: 3200, send: 0.04 });
+    }
+
+    // --- i suoni ---
+    var S = {
+      // tocco generico: morbido "tic" di vetro
+      click: function (b, t) {
+        tone(b, { t: t, f: 1250, f2: 860, glide: 0.045, dur: 0.075, vol: 0.32, a: 0.002, send: 0.06 });
+        noise(b, { t: t, dur: 0.014, vol: 0.06, ftype: 'highpass', f: 4200, q: 0.7 });
+      },
+      // indietro / chiudi: stesso tic ma discendente, più grave (chiude, non apre)
+      back: function (b, t) {
+        tone(b, { t: t, f: 900, f2: 600, glide: 0.06, dur: 0.09, vol: 0.30, a: 0.002, send: 0.05 });
+        noise(b, { t: t, dur: 0.012, vol: 0.05, ftype: 'highpass', f: 3500, q: 0.7 });
+      },
+      // scelta di una carta: tic + piccolo rintocco di conferma
+      select: function (b, t) {
+        S.click(b, t);
+        bell(b, N.G5, t + 0.03, 0.12, 0.30, 0.25);
+      },
+      // scorrimento del carosello: soffio leggerissimo
+      slide: function (b, t) {
+        noise(b, { t: t, dur: 0.16, vol: 0.12, ftype: 'bandpass', f: 900, f2: 2300, q: 1.1, a: 0.035 });
+      },
+      // nuova parola: raffica di "blip" digitali di altezza casuale, come qualcosa che si sta generando,
+      // e un ultimo colpetto fermo (la parola è pronta)
+      newWord: function (b, t) {
+        for (var i = 0; i < 12; i++) {
+          blip(b, t + i * 0.034 + Math.random() * 0.012, 280 + Math.random() * 520, 0.125, 0.042);
+        }
+        blip(b, t + 12 * 0.034 + 0.02, N.D5, 0.11, 0.09, 'triangle', 3000);
+      },
+      // raddoppio: stessa idea ma più fitta, che sale di tono, con un colpo grave all'inizio
+      // e un doppio colpetto finale: la posta è più alta
+      double: function (b, t) {
+        thud(b, t, 0.16, 120, 60, 0.12);
+        for (var i = 0; i < 16; i++) {
+          blip(b, t + 0.02 + i * 0.027 + Math.random() * 0.008, (360 + i * 38) * (0.85 + Math.random() * 0.3), 0.12, 0.038);
+        }
+        blip(b, t + 0.50, N.E5, 0.11, 0.08, 'triangle', 3000);
+        blip(b, t + 0.57, N.A5, 0.12, 0.10, 'triangle', 3200);
+      },
+      // STOP: colpo secco + due bip d'allarme: avvisa tutti che non si possono più dare indizi
+      stop: function (b, t) {
+        thud(b, t, 0.30, 170, 55, 0.14);
+        alarmBeep(b, t + 0.005, 880, 0.14, 0.20);
+        alarmBeep(b, t + 0.19, 880, 0.14, 0.20);
+      },
+      // fine dei 60 secondi: tre bip d'allarme e un lungo "buzzer" da fine tempo (due note vicine che
+      // battono tra loro): più insistente dello STOP, ma ammorbidito per non essere fastidioso
+      timeUp: function (b, t) {
+        thud(b, t, 0.28, 150, 50, 0.2);
+        [0, 0.17, 0.34].forEach(function (d) { alarmBeep(b, t + d, 880, 0.11, 0.15); });
+        tone(b, { t: t + 0.55, f: 440, type: 'square', dur: 0.8, vol: 0.15, a: 0.01, lp: 2300, send: 0.08 });
+        tone(b, { t: t + 0.55, f: 447, type: 'square', dur: 0.8, vol: 0.13, a: 0.01, lp: 2300, send: 0.08 });
+      },
+      // 3 secondi di risposta scaduti: una lunga scivolata discendente, come un palloncino che si sgonfia,
+      // chiusa da un colpo sordo (non è un allarme e non è un errore: è un "tempo scaduto" a vuoto)
+      answerUp: function (b, t) {
+        tone(b, { t: t, f: 1000, f2: 330, glide: 0.42, type: 'triangle', dur: 0.46, vol: 0.30, a: 0.01, lp: 2800, send: 0.12 });
+        tone(b, { t: t, f: 500, f2: 165, glide: 0.42, type: 'sine', dur: 0.46, vol: 0.10, a: 0.01 });
+        noise(b, { t: t + 0.40, dur: 0.07, vol: 0.10, ftype: 'bandpass', f: 700, q: 1.2 });
+      },
+      // risposta esatta (arg = 2 per il raddoppio): arpeggio di campane con una scintilla finale
+      positive: function (b, t, big) {
+        var arp = [N.C5, N.E5, N.G5, N.C6], at = [0, 0.07, 0.14, 0.22], vol = [0.12, 0.128, 0.136, 0.16];
+        arp.forEach(function (f, i) { bell(b, f, t + at[i], vol[i], 0.5, 0.22); });
+        noise(b, { t: t + 0.2, dur: 0.25, vol: 0.025, ftype: 'highpass', f: 7000, q: 0.7, a: 0.1, send: 0.3 });
+        bell(b, N.E6, t + 0.3, 0.10, 0.55, 0.3);
+        if (big) {
+          bell(b, N.G6, t + 0.38, 0.10, 0.6, 0.3);
+          bell(b, N.C7, t + 0.46, 0.075, 0.7, 0.3);
+          tone(b, { t: t + 0.22, f: N.C4, dur: 0.6, vol: 0.08, a: 0.02, send: 0.2 });
+        }
+      },
+      // risposta sbagliata (arg = 2 per il raddoppio): due note gravi che "calano" (il vecchio suono della
+      // risposta scaduta, un po' più veloce); nel raddoppio ne arriva una terza, ancora più bassa
+      negative: function (b, t, big) {
+        tone(b, { t: t, f: 247, f2: 228, glide: 0.17, type: 'triangle', dur: 0.20, vol: 0.17, a: 0.008, lp: 1800, send: 0.15 });
+        tone(b, { t: t, f: 494, f2: 456, glide: 0.17, type: 'sine', dur: 0.18, vol: 0.14, a: 0.008 });
+        tone(b, { t: t + 0.18, f: 196, f2: 160, glide: 0.28, type: 'triangle', dur: 0.32, vol: 0.19, a: 0.008, lp: 1600, send: 0.2 });
+        tone(b, { t: t + 0.18, f: 392, f2: 320, glide: 0.28, type: 'sine', dur: 0.28, vol: 0.15, a: 0.008 });
+        thud(b, t + 0.18, 0.05, 130, 70, 0.12);
+        if (big) {
+          tone(b, { t: t + 0.36, f: 165, f2: 120, glide: 0.34, type: 'triangle', dur: 0.40, vol: 0.19, a: 0.008, lp: 1500, send: 0.22 });
+          tone(b, { t: t + 0.36, f: 330, f2: 240, glide: 0.34, type: 'sine', dur: 0.34, vol: 0.15, a: 0.008 });
+          thud(b, t + 0.36, 0.06, 110, 60, 0.14);
+        }
+      },
+      // passo: soffio che sale e un piccolo "tic" neutro (non è né un successo né un errore)
+      passo: function (b, t) {
+        noise(b, { t: t, dur: 0.15, vol: 0.12, ftype: 'bandpass', f: 700, f2: 2600, q: 1.2, a: 0.03 });
+        tone(b, { t: t + 0.11, f: N.A5, dur: 0.09, vol: 0.22, a: 0.003, send: 0.12 });
+      },
+      // reset: soffio che scende + tono che cala (si "riavvolge")
+      reset: function (b, t) {
+        noise(b, { t: t, dur: 0.24, vol: 0.17, ftype: 'bandpass', f: 3000, f2: 400, q: 1.1, a: 0.03 });
+        tone(b, { t: t, f: 520, f2: 130, glide: 0.22, dur: 0.26, vol: 0.30, a: 0.004, send: 0.1 });
+      },
+      // messaggi al centro (kind = turn | tiebreak | passo | raddoppio)
+      notify: function (b, t, kind) {
+        if (kind === 'tiebreak') {
+          thud(b, t, 0.22, 150, 62, 0.2);
+          bell(b, N.D5, t + 0.04, 0.16, 0.7, 0.3);
+          bell(b, N.A5, t + 0.2, 0.17, 0.9, 0.32);
+        } else if (kind === 'passo' || kind === 'raddoppio') {
+          bell(b, N.E5, t, 0.14, 0.4, 0.25);
+          bell(b, N.C5, t + 0.15, 0.15, 0.6, 0.28);
+        } else {
+          bell(b, N.C5, t, 0.145, 0.5, 0.25);
+          bell(b, N.G5, t + 0.12, 0.16, 0.55, 0.28);
+          bell(b, N.C6, t + 0.24, 0.105, 0.7, 0.3);
+        }
+      },
+      // classifica finale (Sfida, anche dopo lo spareggio): fanfara prolungata, più grande di quella da 10 punti:
+      // rullo, salita, accordo pieno che si apre piano e scintille
+      results: function (b, t) {
+        [0, 0.09, 0.18].forEach(function (d, i) { thud(b, t + d, 0.10 + i * 0.04, 140, 70, 0.09); });
+        [N.C5, N.E5, N.G5, N.C6, N.E6, N.G6].forEach(function (f, i) { pluck(b, f, t + 0.25 + i * 0.065, 0.14 + i * 0.008, 0.22, 5200, 0.2); });
+        var T = t + 0.72;
+        [N.C5, N.G5, N.C6, N.E6, N.G6, N.C7].forEach(function (f, i) { bell(b, f, T + i * 0.012, 0.115 - i * 0.01, 2.0, 0.42); });
+        tone(b, { t: T, f: N.C3, dur: 2.0, vol: 0.12, a: 0.03, send: 0.25 });
+        tone(b, { t: T, f: 196, dur: 1.8, vol: 0.09, a: 0.03, send: 0.25 });
+        [N.C4, N.E4, N.G4].forEach(function (f) { tone(b, { t: T, f: f, type: 'triangle', dur: 1.9, vol: 0.05, a: 0.25, lp: 1500, send: 0.3 }); });
+        [0.12, 0.34, 0.56, 0.82, 1.1, 1.4].forEach(function (d) { noise(b, { t: T + d, dur: 0.14, vol: 0.026, ftype: 'highpass', f: 7500, q: 0.7, send: 0.3 }); });
+        bell(b, N.E6, T + 0.9, 0.07, 1.0, 0.4);
+        bell(b, N.G6, T + 1.15, 0.06, 1.0, 0.4);
+      },
+      // fine partita: tre "umori" in base al punteggio
+      jingleLow: function (b, t) {
+        bell(b, N.C5, t, 0.13, 0.55, 0.35);
+        bell(b, N.A4, t + 0.3, 0.12, 0.6, 0.35);
+        bell(b, N.F4, t + 0.62, 0.12, 1.1, 0.4);
+      },
+      jingleMid: function (b, t) {
+        [N.A4, N.C5, N.E5, N.A5].forEach(function (f, i) { pluck(b, f, t + i * 0.13, 0.14 + i * 0.012, 0.22, 4200, 0.2); });
+        bell(b, N.A5, t + 0.46, 0.13, 0.9, 0.32);
+        bell(b, N.E6, t + 0.46, 0.09, 0.9, 0.32);
+        bell(b, N.C6, t + 0.52, 0.085, 0.9, 0.32);
+      },
+      jingleHigh: function (b, t) {
+        [N.C5, N.E5, N.G5, N.C6, N.E6].forEach(function (f, i) { pluck(b, f, t + i * 0.075, 0.13 + i * 0.009, 0.18, 5200, 0.2); });
+        tone(b, { t: t + 0.4, f: N.C3, dur: 1.1, vol: 0.11, a: 0.02, send: 0.2 });
+        [N.C5, N.G5, N.C6, N.E6, N.G6].forEach(function (f, i) { bell(b, f, t + 0.4, 0.115 - i * 0.009, 1.15, 0.38); });
+        [0.5, 0.62, 0.76].forEach(function (d) { noise(b, { t: t + d, dur: 0.12, vol: 0.025, ftype: 'highpass', f: 7500, q: 0.7, send: 0.3 }); });
+      }
+    };
+
+    function ensure() {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!sharedAudioCtx) sharedAudioCtx = new Ctx();
+      if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+      if (!liveBus || liveBus.ctx !== sharedAudioCtx) liveBus = makeBus(sharedAudioCtx, sharedAudioCtx.destination);
+    }
+    return {
+      names: Object.keys(S),
+      play: function (name, arg) {
+        try { ensure(); S[name](liveBus, sharedAudioCtx.currentTime + 0.01, arg); } catch (e) { /* audio non disponibile su questo dispositivo */ }
+      },
+      // per le prove: genera il suono in un contesto "offline" e restituisce i campioni
+      render: function (name, arg, seconds, sampleRate) {
+        var sr = sampleRate || 44100;
+        var off = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, Math.ceil(sr * seconds), sr);
+        var bus = makeBus(off, off.destination);
+        S[name](bus, 0.02, arg);
+        return off.startRendering();
+      }
+    };
+  })();
+  /*NS-END*/
+
   function playAlertSound() {
     if (!appSettings.audio) return;
     try {
@@ -3742,7 +4027,18 @@
     } catch (e) { /* audio non disponibile su questo dispositivo */ }
   }
 
-  function playPositiveSound() {
+  function soundNew() { return appSettings.soundStyle !== 'classic'; }
+  // suoni nuovi: STOP, fine tempo, raddoppio, indietro e scelta carta hanno ora un suono tutto loro
+  function playStopSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('stop'); else playAlertSound(); }
+  function playTimeUpSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('timeUp'); else playAlertSound(); }
+  function playDoubleSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('double'); else playGenerateSound(); }
+  function playBackSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('back'); else playClickSound(); }
+  function playResultsSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('results'); else playEndGameJingle(99); }
+  function playSelectSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('select'); else playClickSound(); }
+
+  function playPositiveSound(delta) {
+    if (!appSettings.audio) return;
+    if (soundNew()) { NS.play('positive', delta > 1); return; }
     // Piccolo "level up": arpeggio ascendente allegro invece di un singolo tono.
     playNoteSequence([
       { freq: 523.25, offset: 0, duration: 0.11, type: 'triangle', volume: 0.26 },
@@ -3751,15 +4047,23 @@
       { freq: 1046.5, offset: 0.22, duration: 0.2, type: 'triangle', volume: 0.32 }
     ]);
   }
-  function playNegativeSound() { playTone(420, 160, 0.28, 'sawtooth', 0.26); }
-  function playPassoSound() { playTone(600, 600, 0.12, 'triangle', 0.22); }
-  function playResetSound() { playTone(300, 1000, 0.22, 'square', 0.22); }
-  function playClickSound() { playTone(680, 880, 0.09, 'sine', 0.2); }
+  function playNegativeSound(delta) {
+    if (!appSettings.audio) return;
+    if (soundNew()) { NS.play('negative', delta < -1); return; }
+    playTone(420, 160, 0.28, 'sawtooth', 0.26);
+  }
+  function playPassoSound() { if (!appSettings.audio) return; if (soundNew()) { NS.play('passo'); return; } playTone(600, 600, 0.12, 'triangle', 0.22); }
+  function playResetSound() { if (!appSettings.audio) return; if (soundNew()) { NS.play('reset'); return; } playTone(300, 1000, 0.22, 'square', 0.22); }
+  function playClickSound() { if (!appSettings.audio) return; if (soundNew()) { NS.play('click'); return; } playTone(680, 880, 0.09, 'sine', 0.2); }
   function playSlideSound() {
+    if (!appSettings.audio) return;
+    if (soundNew()) { NS.play('slide'); return; }
     // breve "whoosh" discreto, identico in entrambe le direzioni: solo un sottofondo
     playTone(560, 280, 0.14, 'triangle', 0.095);
   }
-  function playNotifySound() {
+  function playNotifySound(kind) {
+    if (!appSettings.audio) return;
+    if (soundNew()) { NS.play('notify', kind); return; }
     playNoteSequence([
       { freq: 1318.51, offset: 0, duration: 0.2, type: 'sine', volume: 0.28 },
       { freq: 987.77, offset: 0.13, duration: 0.34, type: 'sine', volume: 0.26 }
@@ -3767,6 +4071,8 @@
   }
 
   function playEndGameJingle(finalScore) {
+    if (!appSettings.audio) return;
+    if (soundNew()) { NS.play(finalScore <= 4 ? 'jingleLow' : (finalScore <= 9 ? 'jingleMid' : 'jingleHigh')); return; }
     if (finalScore <= 4) {
       // Poco entusiasmante: tre note morbide (sine) che scendono lentamente, tipo "vabbè".
       playNoteSequence([
@@ -3799,6 +4105,7 @@
 
   function playGenerateSound() {
     if (!appSettings.audio) return;
+    if (soundNew()) { NS.play('newWord'); return; }
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
@@ -3825,6 +4132,7 @@
 
   function playAnswerTimeUpSound() {
     if (!appSettings.audio) return;
+    if (soundNew()) { NS.play('answerUp'); return; }
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
@@ -4330,7 +4638,7 @@
           pendingWordTime = null;
         }
         enterPendingEndOfGame();
-        playAlertSound();
+        playTimeUpSound();
         vibrate([60, 60, 60]);
       }
       updateTimerDisplay();
@@ -4423,7 +4731,7 @@
     showIdleRow();
     enterScoringPhase();
     recordWordEnd();
-    playAlertSound();
+    playStopSound();
     vibrate(50);
     startAnswerTimer();
   });
@@ -4434,6 +4742,7 @@
     resetConfirmOverlayEl.style.display = 'flex';
   });
   document.getElementById('btn-reset-confirm-no').addEventListener('click', function () {
+    playBackSound();
     resetConfirmOverlayEl.style.display = 'none';
   });
   document.getElementById('btn-reset-confirm-yes').addEventListener('click', function () {
@@ -4459,7 +4768,7 @@
     if (howtoBodyEl) howtoBodyEl.scrollTop = 0;
   });
   document.getElementById('btn-howto-close').addEventListener('click', function () {
-    playClickSound();
+    playBackSound();
     howtoOverlayEl.style.display = 'none';
   });
 
@@ -4497,7 +4806,23 @@
     });
   });
 
+  var soundStyleButtons = document.querySelectorAll('[data-sound-choice]');
+  function syncSoundStyleUI() {
+    soundStyleButtons.forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-sound-choice') === appSettings.soundStyle);
+    });
+  }
+  soundStyleButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      appSettings.soundStyle = btn.getAttribute('data-sound-choice');
+      saveSettings();
+      syncSoundStyleUI();
+      playSelectSound(); // anteprima nello stile appena scelto
+    });
+  });
+
   document.getElementById('btn-settings').addEventListener('click', function () {
+    syncSoundStyleUI();
     audioToggleEl.checked = appSettings.audio;
     vibrationToggleEl.checked = appSettings.vibration;
     syncTextSizeUI();
@@ -4511,7 +4836,7 @@
     playClickSound();
   });
   document.getElementById('btn-settings-close').addEventListener('click', function () {
-    playClickSound();
+    playBackSound();
     settingsOverlayEl.style.display = 'none';
   });
   document.getElementById('btn-sync-now').addEventListener('click', function () {
@@ -4598,7 +4923,7 @@
     btnResetEl.disabled = true;
     stopAnswerTimer();
     recordWordStart();
-    playGenerateSound();
+    playDoubleSound();
     vibrate(25);
   });
 
