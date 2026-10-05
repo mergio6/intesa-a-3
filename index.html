@@ -3914,6 +3914,17 @@
         bell(b, N.E6, T + 0.9, 0.07, 1.0, 0.4);
         bell(b, N.G6, T + 1.15, 0.06, 1.0, 0.4);
       },
+      // accesso al gioco: un soffio che si apre (come un sipario), poi note di campana che salgono
+      // sulla scala pentatonica e si fermano su un accordo luminoso, con un velo morbido sotto
+      welcome: function (b, t) {
+        noise(b, { t: t, dur: 0.55, vol: 0.05, ftype: 'bandpass', f: 400, f2: 3200, q: 0.9, a: 0.28, send: 0.2 });
+        [N.C5, N.E5, N.G5, N.C6, N.E6].forEach(function (f, i) {
+          bell(b, f, t + 0.30 + i * 0.12, 0.07 + i * 0.009, 1.3, 0.4);
+        });
+        [N.C6, N.E6, N.G6].forEach(function (f, i) { bell(b, f, t + 0.92 + i * 0.015, 0.065 - i * 0.009, 1.7, 0.45); });
+        [N.C4, N.E4, N.G4].forEach(function (f) { tone(b, { t: t + 0.3, f: f, type: 'triangle', dur: 1.9, vol: 0.03, a: 0.35, lp: 1400, send: 0.3 }); });
+        [0.95, 1.2, 1.5].forEach(function (d) { noise(b, { t: t + d, dur: 0.12, vol: 0.016, ftype: 'highpass', f: 7500, q: 0.7, send: 0.3 }); });
+      },
       // fine partita: tre "umori" in base al punteggio
       jingleLow: function (b, t) {
         bell(b, N.C5, t, 0.13, 0.55, 0.35);
@@ -4033,6 +4044,28 @@
   function playTimeUpSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('timeUp'); else playAlertSound(); }
   function playDoubleSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('double'); else playGenerateSound(); }
   function playBackSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('back'); else playClickSound(); }
+  // ---------- suono di accesso al gioco (a fine schermata iniziale) ----------
+  // I browser non permettono di far partire suoni finché non si tocca lo schermo almeno una volta.
+  // Quindi: se l'audio è già consentito (app installata, computer...) suona subito; altrimenti suona
+  // al primo tocco, ma solo se arriva entro pochi secondi (poi non avrebbe più senso di "benvenuto").
+  var welcomeDone = false;
+  function playWelcomeSound() {
+    if (welcomeDone) return;
+    if (!appSettings.audio) { welcomeDone = true; return; }
+    var startedAt = Date.now();
+    function fire() {
+      if (welcomeDone || Date.now() - startedAt > 6000) return;
+      welcomeDone = true;
+      if (soundNew()) NS.play('welcome'); else playPositiveSound();
+    }
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!sharedAudioCtx) sharedAudioCtx = new Ctx();
+      if (sharedAudioCtx.state === 'running') { fire(); return; }
+      var p = sharedAudioCtx.resume();
+      if (p && p.then) p.then(function () { if (sharedAudioCtx.state === 'running') fire(); });
+    } catch (e) { /* audio non disponibile su questo dispositivo */ }
+  }
   function playResultsSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('results'); else playEndGameJingle(99); }
   function playSelectSound() { if (!appSettings.audio) return; if (soundNew()) NS.play('select'); else playClickSound(); }
 
@@ -4974,6 +5007,7 @@
     if (!splashEl) return;
     setTimeout(function () {
       splashEl.classList.add('splash-hidden');
+      playWelcomeSound(); // il suono accoglie il giocatore mentre compare il menu
       setTimeout(function () { splashEl.style.display = 'none'; }, 1150);
     }, 3000);
   })();
