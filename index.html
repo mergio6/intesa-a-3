@@ -53,6 +53,9 @@
     --stage-placeholder: rgba(16, 22, 60, 0.42);
     --stage-glow: rgba(29, 114, 224, 0.16);
     --passo-icon-fg: #FFFFFF;
+    --stop-red: #D93A3A;
+    --glass-bg: rgba(255, 255, 255, 0.62);
+    --glass-border: rgba(255, 255, 255, 0.75);
     --wash-blue: rgba(29, 114, 224, 0.10);
     --wash-green: rgba(47, 174, 96, 0.10);
     --wash-orange: rgba(242, 153, 74, 0.12);
@@ -90,6 +93,9 @@
       --stage-placeholder: rgba(238, 241, 253, 0.48);
       --stage-glow: rgba(79, 156, 255, 0.20);
       --passo-icon-fg: #06122A;
+      --stop-red: #E94F4F;
+      --glass-bg: rgba(22, 30, 64, 0.60);
+      --glass-border: rgba(255, 255, 255, 0.14);
       --wash-blue: rgba(79, 156, 255, 0.28);
       --wash-green: rgba(63, 208, 122, 0.26);
       --wash-orange: rgba(255, 169, 77, 0.26);
@@ -127,6 +133,9 @@
     --stage-placeholder: rgba(238, 241, 253, 0.48);
     --stage-glow: rgba(79, 156, 255, 0.20);
     --passo-icon-fg: #06122A;
+    --stop-red: #E94F4F;
+    --glass-bg: rgba(22, 30, 64, 0.60);
+    --glass-border: rgba(255, 255, 255, 0.14);
     --wash-blue: rgba(79, 156, 255, 0.28);
     --wash-green: rgba(63, 208, 122, 0.26);
     --wash-orange: rgba(255, 169, 77, 0.26);
@@ -411,43 +420,6 @@
     position: relative;
     box-shadow: 0 10px 30px -12px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.06);
   }
-  .center-notice {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(0.92);
-    background: var(--panel);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px 28px;
-    font-family: 'Big Shoulders Display', sans-serif;
-    font-weight: 800;
-    font-size: clamp(20px, 7vw, 30px);
-    letter-spacing: 0.03em;
-    box-shadow: 0 10px 34px rgba(0,0,0,0.4);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    z-index: 8;
-    white-space: nowrap;
-  }
-  .center-notice.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  .center-notice.passo { border-color: var(--border); color: var(--text-dim); }
-  .center-notice.raddoppio { background: var(--orange); border-color: var(--orange); color: #3A2200; }
-  .center-notice.turn {
-    background: var(--orange);
-    border-color: var(--orange);
-    color: #3A2200;
-    text-transform: uppercase;
-    white-space: normal;
-    /* larghezza naturale del testo (non metà schermo, come per effetto di left:50%) */
-    width: max-content;
-    max-width: calc(100vw - 48px);
-    font-size: clamp(15px, 5.5vw, 22px);
-    line-height: 1.35;
-  }
-  .center-notice .nw { white-space: nowrap; }
   .timer {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800;
@@ -578,26 +550,6 @@
   button.btn.reset-all { background: var(--panel-2); border-color: var(--border); color: var(--text-dim); font-size: clamp(13px, 3.4vw, 15px); letter-spacing: 0.02em; box-shadow: none; }
 
 
-  .toast {
-    position: fixed;
-    left: 50%;
-    bottom: 18px;
-    transform: translateX(-50%) translateY(10px);
-    background: var(--text);
-    color: var(--bg);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 9px 15px;
-    border-radius: 999px;
-    box-shadow: 0 4px 16px var(--shadow);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    z-index: 20;
-    max-width: 86%;
-    text-align: center;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   .mode-indicator {
     flex: 0 0 auto;
@@ -1756,6 +1708,117 @@
     #menu-backdrop, #view-play.game-enter .scoreboard, #view-play.game-enter .stage, #view-play.game-enter #row-idle,
     #view-play.game-enter #score-row, #view-play.game-enter #row-reset { animation-duration: 0.01ms !important; animation-delay: 0s !important; }
   }
+
+  /* =====================================================================
+     MESSAGGI (turno, spareggio, passo/raddoppi esauriti, avvisi): finestra traslucida "vetro",
+     nello stesso stile di carte, resoconti e impostazioni.
+     ===================================================================== */
+  .center-notice {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: max-content;
+    height: max-content;
+    max-width: calc(100vw - 48px);
+    min-width: min(280px, calc(100vw - 48px));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 26px 32px 26px;
+    text-align: center;
+    color: var(--text);
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    box-shadow: 0 30px 60px -22px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    transform: translateY(12px) scale(0.94);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.32s cubic-bezier(.22,.85,.3,1);
+    z-index: 8;
+  }
+  .center-notice.show { opacity: 1; transform: none; }
+  .cn-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    flex: 0 0 auto;
+  }
+  .cn-icon svg { width: 29px; height: 29px; display: block; }
+  .cn-icon.ic-blue { background: var(--blue); color: var(--passo-icon-fg); box-shadow: 0 12px 22px -10px rgba(29, 114, 224, 0.75); }
+  .cn-icon.ic-orange { background: var(--orange); color: #1B1300; box-shadow: 0 12px 22px -10px rgba(242, 153, 74, 0.85); }
+  .cn-icon.ic-gold { background: #E8B93E; color: #3A2600; box-shadow: 0 12px 22px -10px rgba(232, 185, 62, 0.85); }
+  .cn-title {
+    display: block;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 9.5vw, 44px);
+    line-height: 1.05;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .cn-title.sm { font-size: clamp(26px, 7.5vw, 34px); }
+  .cn-sub {
+    display: block;
+    white-space: nowrap;
+    font-size: clamp(14px, 4.2vw, 18px);
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--blue-dark);
+  }
+  .center-notice.tiebreak .cn-sub { color: var(--chip-pass); }
+  .center-notice.raddoppio .cn-title { color: var(--orange-dark); }
+  .center-notice.passo .cn-title { color: var(--blue-dark); }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%) translateY(10px);
+    width: max-content;
+    max-width: calc(100vw - 40px);
+    padding: 13px 22px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--text);
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 22px;
+    box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(.22,.85,.3,1);
+    z-index: 20;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-height: 680px) {
+    .center-notice { padding: 18px 26px; }
+    .cn-icon { width: 50px; height: 50px; margin-bottom: 3px; }
+    .cn-icon svg { width: 24px; height: 24px; }
+  }
+
+  /* STOP: rosso appena meno intenso (soprattutto in tema scuro) e riflesso più discreto */
+  button.btn.stop {
+    background-color: var(--stop-red);
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 62%);
+    box-shadow: 0 14px 24px -12px rgba(190, 45, 45, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+  #view-play.stop-mode #row-running .btn.stop {
+    box-shadow: 0 18px 32px -14px rgba(190, 45, 45, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
 </style>
 </head>
 <body>
@@ -2410,8 +2473,16 @@
     div.textContent = str;
     return div.innerHTML;
   }
+  // icona del messaggio, in base al tipo
+  var NOTICE_ICONS = {
+    turn:      ['ic-blue',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22V4"/><path d="M5 4h13l-2.5 4.5L18 13H5"/></svg>'],
+    tiebreak:  ['ic-gold',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a2 2 0 0 0 0 4h1"/><path d="M17 6h3a2 2 0 0 1 0 4h-1"/></svg>'],
+    passo:     ['ic-blue',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>'],
+    raddoppio: ['ic-orange', '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>']
+  };
   function showCenterNotice(html, variant, duration) {
-    centerNoticeEl.innerHTML = html;
+    var ic = NOTICE_ICONS[variant];
+    centerNoticeEl.innerHTML = (ic ? '<span class="cn-icon ' + ic[0] + '">' + ic[1] + '</span>' : '') + html;
     centerNoticeEl.className = 'center-notice show' + (variant ? ' ' + variant : '');
     clearTimeout(centerNoticeTimeout);
     if (duration !== 0) {
@@ -2725,7 +2796,7 @@
       }
       if (raddoppiExhaustedPending) {
         raddoppiExhaustedPending = false;
-        showCenterNotice('RADDOPPI ESAURITI', 'raddoppio');
+        showCenterNotice('<span class="cn-title sm">RADDOPPI ESAURITI</span>', 'raddoppio');
       }
       if (pendingEndOfGame) {
         if (pendingWordTime !== null) wordTimes.push(pendingWordTime);
@@ -2749,7 +2820,7 @@
       minus1El.classList.remove('pulse'); plus1El.classList.remove('pulse'); minus2El.classList.remove('pulse'); plus2El.classList.remove('pulse'); btnPassoEl.classList.remove('pulse');
       if (raddoppiExhaustedPending) {
         raddoppiExhaustedPending = false;
-        showCenterNotice('RADDOPPI ESAURITI', 'raddoppio');
+        showCenterNotice('<span class="cn-title sm">RADDOPPI ESAURITI</span>', 'raddoppio');
       }
       pendingFinalizeTimeoutId = setTimeout(finalizeEndOfGame, 500);
       return;
@@ -2762,10 +2833,10 @@
     passiUsedCount++;
     stopAnswerTimer();
     playPassoSound();
-    if (passi === 0) showCenterNotice('PASSO ESAURITI', 'passo');
+    if (passi === 0) showCenterNotice('<span class="cn-title sm">PASSO ESAURITI</span>', 'passo');
     if (raddoppiExhaustedPending) {
       raddoppiExhaustedPending = false;
-      showCenterNotice('RADDOPPI ESAURITI', 'raddoppio');
+      showCenterNotice('<span class="cn-title sm">RADDOPPI ESAURITI</span>', 'raddoppio');
     }
     enterPlayPhase();
   });
@@ -3242,7 +3313,7 @@
     teamNameBannerEl.hidden = false;
     enterGameplay();
     resetRoundState({ keepPools: keepPools, playSound: false });
-    showCenterNotice(escapeHtml(teamName.toUpperCase()) + '<br><span class="nw">È IL VOSTRO TURNO</span>', 'turn', 3000);
+    showCenterNotice('<span class="cn-title">' + escapeHtml(teamName.toUpperCase()) + '</span><span class="cn-sub">È IL VOSTRO TURNO</span>', 'turn', 3000);
   }
 
   function captureCurrentTeamResult() {
@@ -3345,7 +3416,7 @@
   }
 
   function announceTiebreakTurn(name) {
-    showCenterNotice('SPAREGGIO<br>' + escapeHtml(name.toUpperCase()), 'turn', 2000);
+    showCenterNotice('<span class="cn-sub">SPAREGGIO</span><span class="cn-title">' + escapeHtml(name.toUpperCase()) + '</span>', 'tiebreak', 2000);
   }
 
   function startTiebreak(teamIndices) {
