@@ -1777,6 +1777,11 @@
   .center-notice.tiebreak .cn-sub { color: var(--chip-pass); }
   .center-notice.raddoppio .cn-title { color: var(--orange-dark); }
   .center-notice.passo .cn-title { color: var(--blue-dark); }
+  .cn-title.t-passo { color: var(--blue-dark); }
+  .cn-title.t-raddoppio { color: var(--orange-dark); }
+  /* due icone affiancate (passo e raddoppi esauriti insieme) */
+  .cn-icons { display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 6px; }
+  .cn-icons .cn-icon { margin-bottom: 0; }
 
   .toast {
     position: fixed;
@@ -1807,6 +1812,7 @@
   @media (max-height: 680px) {
     .center-notice { padding: 18px 26px; }
     .cn-icon { width: 50px; height: 50px; margin-bottom: 3px; }
+    .cn-icons { gap: 12px; margin-bottom: 3px; }
     .cn-icon svg { width: 24px; height: 24px; }
   }
 
@@ -2749,7 +2755,13 @@
     clearTimeout(noticeUnlockTimer);
     setNoticeLock(true);
     var ic = NOTICE_ICONS[variant];
-    centerNoticeEl.innerHTML = (ic ? '<span class="cn-icon ' + ic[0] + '">' + ic[1] + '</span>' : '') + html;
+    var iconHtml = ic ? '<span class="cn-icon ' + ic[0] + '">' + ic[1] + '</span>' : '';
+    // passo e raddoppi finiti insieme: le due icone (freccia e fulmine) una di fianco all'altra
+    if (variant === 'both') {
+      iconHtml = '<span class="cn-icons"><span class="cn-icon ' + NOTICE_ICONS.passo[0] + '">' + NOTICE_ICONS.passo[1] + '</span>' +
+                 '<span class="cn-icon ' + NOTICE_ICONS.raddoppio[0] + '">' + NOTICE_ICONS.raddoppio[1] + '</span></span>';
+    }
+    centerNoticeEl.innerHTML = iconHtml + html;
     centerNoticeEl.className = 'center-notice show' + (variant ? ' ' + variant : '');
     clearTimeout(centerNoticeTimeout);
     if (duration !== 0) {
@@ -3117,7 +3129,10 @@
     raddoppiExhaustedPending = false;
     // i messaggi compaiono dopo il suono del passo (e restano bloccati i pulsanti nell'attesa)
     if (passoExhaustedNow || raddoppiExhaustedNow) holdButtons(650, function () {
-      if (passoExhaustedNow) showCenterNotice('<span class="cn-title sm">PASSO ESAURITI</span>', 'passo');
+      if (passoExhaustedNow && raddoppiExhaustedNow) {
+        // caso raro: l'ultimo raddoppio è stato passato con l'ultimo passo, quindi finiscono insieme
+        showCenterNotice('<span class="cn-title sm t-passo">PASSO ESAURITI</span><span class="cn-title sm t-raddoppio">RADDOPPI ESAURITI</span>', 'both', 2300);
+      } else if (passoExhaustedNow) showCenterNotice('<span class="cn-title sm">PASSO ESAURITI</span>', 'passo');
       else showCenterNotice('<span class="cn-title sm">RADDOPPI ESAURITI</span>', 'raddoppio');
     });
     enterPlayPhase();
@@ -4430,7 +4445,7 @@
   function playNotifySound(kind) {
     haptic(kind === 'turn' ? 'notifyTurn' : (kind === 'tiebreak' ? 'notifyTie' : 'notifyEx'));
     if (!appSettings.audio) return;
-    if (soundNew()) { NS.play('notify', kind); return; }
+    if (soundNew()) { NS.play('notify', kind === 'both' ? 'passo' : kind); return; }
     playNoteSequence([
       { freq: 1318.51, offset: 0, duration: 0.2, type: 'sine', volume: 0.28 },
       { freq: 987.77, offset: 0.13, duration: 0.34, type: 'sine', volume: 0.26 }
