@@ -1951,26 +1951,48 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease;
+  }
+  #view-play.viewing-past .sb-dim { opacity: 1; pointer-events: auto; }
+  /* il riquadro sta al centro della zona tempo/parola (la posizione verticale la imposta il codice) */
+  .sb-hint {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(calc(100vw - 40px), 340px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 26px 24px 28px;
+    border-radius: 28px;
+    text-align: center;
+    color: var(--text);
+    /* pieno (non traslucido): deve coprire del tutto timer e parola, senza lasciarli intravedere */
+    background-color: var(--panel);
+    background-image: linear-gradient(180deg, var(--wash-blue) 0%, rgba(0, 0, 0, 0) 60%);
+    border: 1px solid var(--border);
+    box-shadow: 0 30px 60px -22px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .sb-hint-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    background: var(--orange);
+    color: #1B1300;
+    box-shadow: 0 12px 22px -10px rgba(242, 153, 74, 0.85);
+    flex: 0 0 auto;
   }
-  #view-play.viewing-past .sb-dim { opacity: 1; pointer-events: auto; }
-  .sb-hint {
-    max-width: 300px;
-    padding: 16px 22px;
-    border-radius: 22px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 800;
-    line-height: 1.35;
-    color: var(--text);
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  .sb-hint-icon svg { width: 30px; height: 30px; display: block; }
+  .sb-hint-text { font-size: 20px; font-weight: 800; line-height: 1.3; }
+  @media (max-height: 680px) {
+    .sb-hint { padding: 18px 20px 20px; gap: 10px; }
+    .sb-hint-icon { width: 46px; height: 46px; }
+    .sb-hint-icon svg { width: 24px; height: 24px; }
+    .sb-hint-text { font-size: 17px; }
   }
 </style>
 </head>
@@ -2070,7 +2092,7 @@
       <button class="btn reset-all" id="btn-reset-timer">RESET</button>
     </div>
 
-    <div class="sb-dim" id="sb-dim" aria-hidden="true"><div class="sb-hint">Torna alla schermata della tua squadra per continuare a giocare</div></div>
+    <div class="sb-dim" id="sb-dim" aria-hidden="true"><div class="sb-hint" id="sb-hint"><span class="sb-hint-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span><span class="sb-hint-text">Torna alla schermata della tua squadra per continuare a giocare</span></div></div>
   </section>
 
 
@@ -2226,13 +2248,6 @@
         <input type="checkbox" id="settings-audio-toggle" checked>
         <span class="switch-slider"></span>
       </label>
-    </div>
-    <div class="settings-row settings-row-col">
-      <div class="settings-row-label"><span class="settings-icon ic-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>Stile dei suoni</div>
-      <div class="settings-theme-group" id="settings-soundstyle-group">
-        <button type="button" class="settings-theme-btn" data-sound-choice="new">Nuovi</button>
-        <button type="button" class="settings-theme-btn" data-sound-choice="classic">Originali</button>
-      </div>
     </div>
     <div class="settings-row">
       <div class="settings-row-label"><span class="settings-icon ic-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="4" width="8" height="16" rx="2"/><path d="M3 10v4"/><path d="M21 10v4"/></svg></span><span>Vibrazione</span></div>
@@ -2589,7 +2604,7 @@
   ];
 
   // ---------- impostazioni (audio/vibrazione/testo/tema) ----------
-  var appSettings = { audio: true, vibration: true, textScale: 1, theme: 'system', soundStyle: 'new' };
+  var appSettings = { audio: true, vibration: true, textScale: 1, theme: 'system' };
   function applyTextScale() {
     document.documentElement.style.setProperty('--game-text-scale', appSettings.textScale);
   }
@@ -2613,7 +2628,6 @@
         if (parsed.theme === 'light' || parsed.theme === 'dark' || parsed.theme === 'system') {
           appSettings.theme = parsed.theme;
         }
-        if (parsed.soundStyle === 'new' || parsed.soundStyle === 'classic') appSettings.soundStyle = parsed.soundStyle;
       }
     } catch (e) { /* restano i valori di default */ }
   }
@@ -3629,7 +3643,11 @@
     var banner = document.getElementById('team-name-banner');
     car.style.setProperty('--sb-banner-h', ((banner && !banner.hidden) ? banner.offsetHeight : 54) + 'px');
     // il velo (a posizione fissa) parte subito sotto il punteggio e arriva in fondo allo schermo
-    sbDimEl.style.top = Math.round(car.getBoundingClientRect().bottom + 3) + 'px';
+    var dimTop = Math.round(car.getBoundingClientRect().bottom + 3);
+    sbDimEl.style.top = dimTop + 'px';
+    // il riquadro "Torna alla schermata..." sta al centro della zona tempo/parola, così le copre entrambe
+    var stageRect = document.querySelector('.stage').getBoundingClientRect();
+    document.getElementById('sb-hint').style.top = Math.round(stageRect.top + stageRect.height / 2 - dimTop) + 'px';
   }
   function sbUpdateNav() {
     var idx = sbIndex();
@@ -4364,7 +4382,8 @@
     } catch (e) { /* audio non disponibile su questo dispositivo */ }
   }
 
-  function soundNew() { return appSettings.soundStyle !== 'classic'; }
+  // Esiste un solo stile di suoni (quello nuovo): le vecchie versioni restano nel codice solo come ripiego inattivo.
+  function soundNew() { return true; }
   // suoni nuovi: STOP, fine tempo, raddoppio, indietro e scelta carta hanno ora un suono tutto loro
   function playStopSound() { haptic('stop'); if (!appSettings.audio) return; if (soundNew()) NS.play('stop'); else playAlertSound(); }
   function playTimeUpSound() { haptic('timeUp'); if (!appSettings.audio) return; if (soundNew()) NS.play('timeUp'); else playAlertSound(); }
@@ -5156,23 +5175,7 @@
     });
   });
 
-  var soundStyleButtons = document.querySelectorAll('[data-sound-choice]');
-  function syncSoundStyleUI() {
-    soundStyleButtons.forEach(function (btn) {
-      btn.classList.toggle('active', btn.getAttribute('data-sound-choice') === appSettings.soundStyle);
-    });
-  }
-  soundStyleButtons.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      appSettings.soundStyle = btn.getAttribute('data-sound-choice');
-      saveSettings();
-      syncSoundStyleUI();
-      playSelectSound(); // anteprima nello stile appena scelto
-    });
-  });
-
   document.getElementById('btn-settings').addEventListener('click', function () {
-    syncSoundStyleUI();
     audioToggleEl.checked = appSettings.audio;
     vibrationToggleEl.checked = appSettings.vibration;
     syncTextSizeUI();
