@@ -646,7 +646,7 @@
     padding: 20px;
     z-index: 50;
   }
-  #challenge-results-overlay, #endgame-overlay {
+  #challenge-results-overlay, #endgame-overlay, #tb-result-overlay {
     background: rgba(8, 14, 26, 0.38);
     backdrop-filter: blur(7px);
     -webkit-backdrop-filter: blur(7px);
@@ -2112,6 +2112,31 @@
   input[type="range"] { touch-action: pan-y; }
   /* le finestre che scorrono (regole, impostazioni, riepiloghi) non trasmettono lo scorrimento alla pagina */
   .howto-body, .settings-card, .endgame-card, .results-card, .endgame-words { overscroll-behavior: contain; }
+
+  /* ===== Spareggio: finestrella di riepilogo dopo ogni risposta ===== */
+  .tb-result-card {
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    padding: 28px 22px 24px;
+    background-color: var(--panel);
+    background-image: linear-gradient(180deg, rgba(232, 185, 62, 0.22) 0%, rgba(0, 0, 0, 0) 42%);
+    animation: tbResultIn 0.28s cubic-bezier(.22, .85, .3, 1) both;
+  }
+  .tb-result-line {
+    font-size: clamp(18px, 5.4vw, 22px);
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--chip-green);
+    text-wrap: balance;
+  }
+  .tb-result-line.wrong { color: var(--chip-red); }
+  .tb-result-card .mode-btn { width: 100%; margin-top: 6px; }
+  @keyframes tbResultIn {
+    0% { opacity: 0; transform: translateY(12px) scale(0.94); }
+    100% { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .tb-result-card { animation: none; } }
 </style>
 </head>
 <body>
@@ -2311,6 +2336,15 @@
     <h2 class="names-title">Come vi<br>chiamate?</h2>
     <div class="team-name-inputs" id="team-name-inputs"></div>
     <button class="names-confirm-btn" id="btn-start-challenge">Inizia sfida</button>
+  </div>
+</div>
+
+<div class="mode-overlay" id="tb-result-overlay" style="display:none; z-index: 54;" role="dialog" aria-modal="true">
+  <div class="mode-card tb-result-card">
+    <div class="endgame-badge gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/></svg></div>
+    <div class="endgame-team-label" id="tb-result-name"></div>
+    <div class="tb-result-line" id="tb-result-line"></div>
+    <button type="button" class="mode-btn classic" id="tb-result-next">Passa alla squadra successiva</button>
   </div>
 </div>
 
@@ -2842,7 +2876,7 @@
   // icona del messaggio, in base al tipo
   var NOTICE_ICONS = {
     turn:      ['ic-blue',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22V4"/><path d="M5 4h13l-2.5 4.5L18 13H5"/></svg>'],
-    tiebreak:  ['ic-gold',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a2 2 0 0 0 0 4h1"/><path d="M17 6h3a2 2 0 0 1 0 4h-1"/></svg>'],
+    tiebreak:  ['ic-gold',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/></svg>'],
     passo:     ['ic-blue',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>'],
     raddoppio: ['ic-orange', '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>']
   };
@@ -4073,7 +4107,7 @@
     resetTiebreakState();
     tiebreakResolvedOrder = resolvedOrder;
     // la classifica compare dopo il suono dell'ultima risposta; nell'attesa i pulsanti sono bloccati
-    holdButtons(1050, showResultsOverlay);
+    holdButtons(tiebreakAnswerDelay, showResultsOverlay);
   }
 
   function handleTiebreakDraw() {
@@ -4102,19 +4136,70 @@
     playStopSound();
   }
 
-  var tiebreakAnswerDelay = 1000; // quanto aspettare dopo l'ultima risposta (dipende dalla durata del suono)
+  var tiebreakAnswerDelay = 300; // breve attesa dopo il tasto "avanti" (il suono della risposta è già finito, lo si è ascoltato nella finestrella)
+
+  // Dopo l'ultima risposta di un giro: c'è un vincitore? (una sola squadra col tempo migliore tra quelle che hanno indovinato)
+  function tiebreakWouldResolve() {
+    var times = [];
+    tiebreakTeamIndices.forEach(function (idx, i) { var r = tiebreakResults[i]; if (r && r.correct) times.push(r.time); });
+    if (!times.length) return false;
+    var best = Math.min.apply(null, times);
+    return times.filter(function (t) { return t === best; }).length === 1;
+  }
+
+  // Finestrella di riepilogo: nome squadra, esito e un tasto per andare avanti. Il gioco resta fermo finché non lo si preme.
+  var tbResultOverlayEl = document.getElementById('tb-result-overlay');
+  var tbResultNextEl = document.getElementById('tb-result-next');
+  var tbResultVisible = false;
+  var tbResultContinue = null;
+  function showTiebreakResult(name, correct, seconds, buttonLabel, onContinue) {
+    document.getElementById('tb-result-name').textContent = name;
+    var line = document.getElementById('tb-result-line');
+    line.classList.toggle('wrong', !correct);
+    // il numero resta unito all'unità ("12 secondi" non si spezza) e, se serve, le due righe sono bilanciate
+    line.textContent = correct ? 'Tempo realizzato: ' + formatTiebreakTime(seconds).replace(' ', '\u00A0') : 'Risposta sbagliata';
+    tbResultNextEl.textContent = buttonLabel;
+    tbResultContinue = onContinue;
+    tbResultVisible = true;
+    tbResultOverlayEl.style.display = 'flex';
+    // il tasto prende il focus: Invio e barra spaziatrice lo premono (e non il pulsante di risposta sotto la finestra)
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    try { tbResultNextEl.focus({ preventScroll: true }); } catch (e) { /* ignora */ }
+  }
+  // la barra spaziatrice serve per avviare/fermare le parole: sulla finestrella non deve chiuderla per sbaglio (valgono tocco e Invio)
+  ['keydown', 'keyup'].forEach(function (ev) {
+    tbResultNextEl.addEventListener(ev, function (e) { if (e.code === 'Space' || e.key === ' ') e.preventDefault(); });
+  });
+  tbResultNextEl.addEventListener('click', function () {
+    if (!tbResultVisible) return;
+    tbResultVisible = false;
+    tbResultOverlayEl.style.display = 'none';
+    tbResultNextEl.blur();
+    playClickSound();
+    var fn = tbResultContinue;
+    tbResultContinue = null;
+    if (fn) fn();
+  });
+
   function handleTiebreakAnswer(isCorrect) {
-    tiebreakAnswerDelay = isCorrect ? 1000 : 800;
+    var pos = tiebreakPos;
+    var name = challengeTeams[tiebreakTeamIndices[pos]].name;
+    var seconds = tiebreakPendingElapsed;
     if (isCorrect) {
-      playPositiveSound();
-      tiebreakResults[tiebreakPos] = { correct: true, time: tiebreakPendingElapsed };
+      playPositiveSound(2);   // stesso suono del raddoppio riuscito
+      tiebreakResults[pos] = { correct: true, time: seconds };
     } else {
-      playNegativeSound();
-      tiebreakResults[tiebreakPos] = { correct: false, time: null };
+      playNegativeSound(-2);  // stesso suono del raddoppio sbagliato
+      tiebreakResults[pos] = { correct: false, time: null };
     }
     tiebreakPendingElapsed = null;
     timerValueEl.textContent = '0';
-    advanceTiebreakTurn();
+    var isLast = pos === tiebreakTeamIndices.length - 1;
+    var label = !isLast ? 'Passa alla squadra successiva' : (tiebreakWouldResolve() ? 'Vedi risultati finali' : 'Nuovo giro di spareggio');
+    showTiebreakResult(name, isCorrect, seconds, label, function () {
+      tiebreakAnswerDelay = 300;
+      advanceTiebreakTurn();   // come di consueto: squadra successiva (o classifica / nuovo giro dopo l'ultima)
+    });
   }
 
   function medalForRank(rank, total) {
@@ -5622,6 +5707,7 @@
     var activeTag = document.activeElement && document.activeElement.tagName;
     if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
     if (pendingOverlayId) return;
+    if (tbResultVisible) return;
     if (howtoOverlayEl.style.display !== 'none') return;
     if (resetConfirmOverlayEl.style.display !== 'none') return;
     e.preventDefault();
