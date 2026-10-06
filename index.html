@@ -2137,6 +2137,28 @@
     100% { opacity: 1; transform: none; }
   }
   @media (prefers-reduced-motion: reduce) { .tb-result-card { animation: none; } }
+
+  /* ===== Credit del creatore: piccolo e discreto ===== */
+  .splash-credit {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    animation: splashRise 1s ease 2.1s backwards;   /* compare per ultimo, senza distrarre */
+  }
+  .splash-credit span, .app-credit {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.07em;
+    color: var(--text-dim);
+    opacity: 0.85;
+  }
+  .splash-credit b, .app-credit b { font-weight: 800; color: var(--text); letter-spacing: 0.05em; }
+  .app-credit { text-align: center; padding: 8px 0 2px; }
 </style>
 </head>
 <body>
@@ -2157,6 +2179,7 @@
   </svg>
   <h1>Intesa a <span>3</span></h1>
   <p class="splash-tagline">Quanto vi capite davvero?</p>
+  <div class="splash-credit" id="splash-credit"><span>Creato da <b>Mergio</b></span></div>
   <div class="splash-action" id="splash-action">
     <div class="splash-bar"><div class="splash-bar-fill"></div></div>
     <button type="button" class="splash-start" id="splash-start" tabindex="-1"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg><span>Inizia</span></button>
@@ -2435,6 +2458,7 @@
       </div>
       <span class="settings-sync-status" id="settings-sync-status">—</span>
     </div>
+    <div class="app-credit">Creato da <b>Mergio</b></div>
   </div>
 </div>
 
@@ -5596,6 +5620,19 @@
         p.el.style.left = Math.max(1, Math.min(p.left, 98 - wPct)).toFixed(1) + '%';
         if (ch < 650 && p.layer === 'far' && p.i % 2 === 1) p.el.style.display = 'none';
       });
+      // la scritta in basso (credit) resta libera: le parole che ci arrivano sopra vengono alzate
+      var creditBox = document.querySelector('.splash-credit'), credit = document.querySelector('.splash-credit span');
+      if (credit && creditBox) {
+        // posizioni di layout (non risentono dell'animazione d'ingresso, che all'avvio sposta la scritta di qualche pixel)
+        var cTop = creditBox.offsetTop + credit.offsetTop - 14, cL = creditBox.offsetLeft + credit.offsetLeft - 16, cR = cL + credit.offsetWidth + 32;
+        placed.forEach(function (p) {
+          var t = p.el.offsetTop, h = p.el.offsetHeight, l = p.el.offsetLeft, w = p.el.offsetWidth;
+          if (t + h > cTop && l + w > cL && l < cR) {
+            var nt = Math.max(0, cTop - h);
+            p.el.style.top = (nt / ch * 100).toFixed(1) + '%';
+          }
+        });
+      }
       var em = document.querySelector('.splash-emblem'), act = document.getElementById('splash-action');
       if (!em || !act) return;
       var cr = container.getBoundingClientRect();
@@ -5607,7 +5644,7 @@
         contentL = Math.min(contentL, r.left - cr.left - 10);
         contentR = Math.max(contentR, r.right - cr.left + 10);
       });
-      var bandTop = em.getBoundingClientRect().top - cr.top - 12, bandBottom = act.getBoundingClientRect().bottom - cr.top + 12, bandMid = (bandTop + bandBottom) / 2;
+      var bandTop = em.getBoundingClientRect().top - cr.top - 18, bandBottom = act.getBoundingClientRect().bottom - cr.top + 18, bandMid = (bandTop + bandBottom) / 2;
       placed.forEach(function (p) {
         var top = p.el.offsetTop, h = p.el.offsetHeight;
         var left = p.el.offsetLeft, w = p.el.offsetWidth;
