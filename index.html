@@ -2000,9 +2000,13 @@
      - il tocco non ritarda e non evidenzia nulla */
   html, body {
     overscroll-behavior: none;
-    touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
+  /* "pan-x pan-y" = si può solo scorrere: niente zoom con il pizzico né con il doppio tocco, su qualsiasi elemento.
+     (Le regole più specifiche, come quelle dei caroselli, restano valide.) */
+  html, body, * { touch-action: pan-x pan-y; }
+  /* lo slider della dimensione del testo si trascina in orizzontale: deve continuare a funzionare */
+  input[type="range"] { touch-action: pan-y; }
   /* le finestre che scorrono (regole, impostazioni, riepiloghi) non trasmettono lo scorrimento alla pagina */
   .howto-body, .settings-card, .endgame-card, .results-card, .endgame-words { overscroll-behavior: contain; }
 </style>
@@ -5336,6 +5340,16 @@
     });
   }
   setupSplashWords();
+
+  // ---------- niente zoom con il pizzico (comportamento da app) ----------
+  // Oltre allo stile e al viewport: se compaiono due dita insieme sullo schermo, il gesto di zoom viene annullato.
+  // Un tocco singolo, un trascinamento o due tocchi brevi su due pulsanti non sono toccati.
+  document.addEventListener('touchmove', function (e) {
+    if (e.touches && e.touches.length > 1 && e.cancelable) e.preventDefault();
+  }, { passive: false });
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (ev) {   // Safari su iPhone/iPad
+    document.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false });
+  });
 
   // ---------- funzionamento offline e installazione come app ----------
   // Il service worker (sw.js) tiene una copia del gioco: senza rete l'app si apre comunque, con la rete mostra sempre l'ultima versione.
