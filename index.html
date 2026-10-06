@@ -58,6 +58,7 @@
     --chip-pass: #B8700F;
     --glow-blue-rgb: 29, 114, 224;
     --glow-orange-rgb: 242, 153, 74;
+    --glow-green-rgb: 47, 174, 96;
     --switch-off: #B9C0DA;
     --scroll-thumb: rgba(29, 114, 224, 0.30);
     --red: #E03B3B;
@@ -98,6 +99,7 @@
       --chip-pass: #F5CB63;
       --glow-blue-rgb: 79, 156, 255;
       --glow-orange-rgb: 255, 169, 77;
+      --glow-green-rgb: 63, 208, 122;
       --switch-off: #3A4675;
       --scroll-thumb: rgba(79, 156, 255, 0.38);
       --red: #FF5C5C;
@@ -138,6 +140,7 @@
     --chip-pass: #F5CB63;
     --glow-blue-rgb: 79, 156, 255;
     --glow-orange-rgb: 255, 169, 77;
+    --glow-green-rgb: 63, 208, 122;
     --switch-off: #3A4675;
     --scroll-thumb: rgba(79, 156, 255, 0.38);
     --red: #FF5C5C;
@@ -611,19 +614,44 @@
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
     mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
   }
+  /* Parole di sfondo dei menu: tre "livelli di profondità" (lontane, medie, vicine) che salgono a velocità diverse,
+     colori del gioco (blu, arancio, verde, grigio), alcune solo a contorno, e un leggero ondeggiare. */
   .floating-word {
     position: absolute;
-    bottom: -10%;
+    bottom: -14%;
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800;
-    color: var(--text-dim);
-    opacity: 0.16;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     white-space: nowrap;
+    color: var(--fw-color, var(--text-dim));
+    will-change: transform;
     animation: floatWordUp linear infinite;
   }
+  .floating-word > span {
+    display: block;
+    animation: swayWord ease-in-out infinite alternate;
+  }
+  .floating-word.fw-far  { opacity: 0.15; font-weight: 600; }
+  .floating-word.fw-mid  { opacity: 0.2; }
+  .floating-word.fw-near { opacity: 0.13; filter: blur(1.4px); }
+  .floating-word.fw-outline > span { color: transparent; -webkit-text-stroke: 1.4px var(--fw-color, var(--text-dim)); }
+  .fw-c-dim { --fw-color: var(--text-dim); }
+  .fw-c-blue { --fw-color: rgb(var(--glow-blue-rgb)); }
+  .fw-c-orange { --fw-color: rgb(var(--glow-orange-rgb)); }
+  .fw-c-green { --fw-color: rgb(var(--glow-green-rgb)); }
   @keyframes floatWordUp {
-    0% { transform: translateY(0) translateX(0); }
-    100% { transform: translateY(-115vh) translateX(var(--word-drift, 0px)); }
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(var(--word-drift, 0px), -125vh, 0); }
+  }
+  @keyframes swayWord {
+    0% { transform: translateX(calc(var(--sway, 8px) * -1)) rotate(calc(var(--tilt, 1deg) * -1)); }
+    100% { transform: translateX(var(--sway, 8px)) rotate(var(--tilt, 1deg)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .floating-word, .floating-word > span { animation: none; }
+    .floating-word { bottom: auto; top: var(--rm-top, 40%); }
   }
   .mode-card {
     background: var(--panel);
@@ -3325,52 +3353,79 @@
 
   // ---------- carosello 3D (scelta modalità / difficoltà) ----------
   // ---------- parole fluttuanti di sfondo (menu) ----------
+  // Tre livelli di profondità: le parole piccole sono lontane (lente, tenui), quelle grandi sono vicine
+  // (più veloci, sfocate e per lo più a contorno), così lo sfondo ha profondità senza disturbare le carte.
   function setupFloatingWords() {
     var containers = document.querySelectorAll('.floating-words');
     if (!containers.length) return;
     var pool = (facileBank.list.length ? facileBank.list : DEFAULT_SINGLE_WORDS).slice();
     if (!pool.length) return;
-    // mescola e prende un sottoinsieme
-    for (var i = pool.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+    function shuffle(arr) {
+      for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+      return arr;
     }
-    var WORDS_PER_SCREEN = 15;
-    var LANE_COUNT = 19; // più corsie che parole: alcune restano libere, altre vicine si sovrappongono leggermente
-    var LANE_WIDTH = 96 / LANE_COUNT;
+    var LAYERS = [
+      { cls: 'fw-far',  count: 8, size: [13, 19], dur: [44, 58], sway: [3, 6],   tilt: [0, 1], outline: 0,    maxLen: 99 },
+      { cls: 'fw-mid',  count: 7, size: [22, 34], dur: [32, 42], sway: [6, 12],  tilt: [0, 2], outline: 0.25, maxLen: 99 },
+      { cls: 'fw-near', count: 4, size: [54, 76], dur: [22, 30], sway: [10, 18], tilt: [1, 3], outline: 0.75, maxLen: 8 }
+    ];
+    var COLORS = ['fw-c-dim', 'fw-c-dim', 'fw-c-dim', 'fw-c-dim', 'fw-c-blue', 'fw-c-blue', 'fw-c-orange', 'fw-c-green'];
+    var viewW = Math.max(320, window.innerWidth || 390);
+    var placed = [];   // parole create: dopo il caricamento dei caratteri se ne misura la larghezza vera
     containers.forEach(function (container) {
-      var chosen = pool.slice(0, WORDS_PER_SCREEN);
-      // sceglie corsie casuali (non una ogni parola in sequenza): così la
-      // distribuzione resta ampia ma occasionalmente due parole vicine
-      // si sfiorano o si sovrappongono leggermente, invece di essere perfettamente regolari
-      var laneIndexes = [];
-      for (var li = 0; li < LANE_COUNT; li++) laneIndexes.push(li);
-      for (var k = laneIndexes.length - 1; k > 0; k--) {
-        var m = Math.floor(Math.random() * (k + 1));
-        var t = laneIndexes[k]; laneIndexes[k] = laneIndexes[m]; laneIndexes[m] = t;
+      var words = shuffle(pool.slice());
+      var used = {};
+      function take(maxLen) {
+        for (var i = 0; i < words.length; i++) {
+          var w = String(words[i]);
+          if (!used[w] && w.length <= maxLen) { used[w] = true; return w; }
+        }
+        return null;
       }
-      var usedLanes = laneIndexes.slice(0, WORDS_PER_SCREEN);
-      chosen.forEach(function (word, i) {
-        var span = document.createElement('span');
-        span.className = 'floating-word';
-        span.textContent = word;
-        var lane = usedLanes[i];
-        var left = 2 + lane * LANE_WIDTH + Math.random() * (LANE_WIDTH * 0.6);
-        // dimensioni molto diversificate: da piccole a grandi
-        var size = 12 + Math.pow(Math.random(), 1.4) * 40;
-        var duration = 20 + Math.random() * 14;
-        // partenza scaglionata in modo regolare lungo il ciclo, con un piccolo
-        // scarto casuale, così le parole non entrano mai tutte insieme
-        var delay = -((i / WORDS_PER_SCREEN) * duration) - Math.random() * (duration / WORDS_PER_SCREEN);
-        var drift = (Math.random() * 40 - 20).toFixed(0) + 'px';
-        span.style.left = left + '%';
-        span.style.fontSize = size + 'px';
-        span.style.animationDuration = duration + 's';
-        span.style.animationDelay = delay + 's';
-        span.style.setProperty('--word-drift', drift);
-        container.appendChild(span);
+      LAYERS.forEach(function (L) {
+        // le parole dello stesso livello stanno in fasce diverse (una per fascia, mescolate): distribuzione uniforme, meno sovrapposizioni
+        var bands = shuffle(Array.apply(null, { length: L.count }).map(function (_, k) { return k; }));
+        for (var i = 0; i < L.count; i++) {
+          var word = take(L.maxLen);
+          if (!word) return;
+          var size = rnd(L.size[0], L.size[1]);
+          var dur = rnd(L.dur[0], L.dur[1]);
+          // larghezza stimata (poi corretta con quella misurata), per non tagliare le parole ai bordi
+          var estPct = (size * 0.58 * word.length) / viewW * 100;
+          var left = Math.max(1, Math.min(1 + (bands[i] + rnd(0.05, 0.85)) * (96 / L.count), 98 - estPct));
+          var span = document.createElement('span');
+          span.className = 'floating-word ' + L.cls + ' ' + COLORS[Math.floor(Math.random() * COLORS.length)] +
+                           (Math.random() < L.outline ? ' fw-outline' : '');
+          var inner = document.createElement('span');
+          inner.textContent = word;
+          span.appendChild(inner);
+          // partenza scaglionata lungo il ciclo, così le parole non entrano mai tutte insieme
+          var delay = -((i / L.count) * dur) - Math.random() * (dur / L.count);
+          span.style.left = left.toFixed(1) + '%';
+          span.style.fontSize = size.toFixed(0) + 'px';
+          span.style.animationDuration = dur.toFixed(1) + 's';
+          span.style.animationDelay = delay.toFixed(1) + 's';
+          span.style.setProperty('--word-drift', Math.round(rnd(-24, 24)) + 'px');
+          span.style.setProperty('--rm-top', Math.round(rnd(8, 88)) + '%');
+          inner.style.animationDuration = rnd(5, 9).toFixed(1) + 's';
+          inner.style.animationDelay = (-rnd(0, 8)).toFixed(1) + 's';
+          inner.style.setProperty('--sway', rnd(L.sway[0], L.sway[1]).toFixed(0) + 'px');
+          inner.style.setProperty('--tilt', (rnd(L.tilt[0], L.tilt[1]) * (Math.random() < 0.5 ? -1 : 1)).toFixed(1) + 'deg');
+          container.appendChild(span);
+          placed.push({ el: span, container: container, left: left });
+        }
       });
     });
+    // con i caratteri caricati si misura la larghezza vera di ogni parola e la si tiene dentro lo schermo
+    function fitWords() {
+      placed.forEach(function (p) {
+        var cw = p.container.clientWidth || viewW;
+        var wPct = p.el.offsetWidth / cw * 100;
+        p.el.style.left = Math.max(1, Math.min(p.left, 98 - wPct)).toFixed(1) + '%';
+      });
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitWords); else window.addEventListener('load', fitWords);
   }
   setupFloatingWords();
 
