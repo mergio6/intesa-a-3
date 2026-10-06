@@ -59,6 +59,9 @@
     --glow-blue-rgb: 29, 114, 224;
     --glow-orange-rgb: 242, 153, 74;
     --glow-green-rgb: 47, 174, 96;
+    --emblem-bg-1: #FFFFFF;
+    --emblem-bg-2: #D9E5FA;
+    --emblem-ring: rgba(29, 114, 224, 0.16);
     --switch-off: #B9C0DA;
     --scroll-thumb: rgba(29, 114, 224, 0.30);
     --red: #E03B3B;
@@ -100,6 +103,9 @@
       --glow-blue-rgb: 79, 156, 255;
       --glow-orange-rgb: 255, 169, 77;
       --glow-green-rgb: 63, 208, 122;
+      --emblem-bg-1: #12233F;
+      --emblem-bg-2: #0B1A2E;
+      --emblem-ring: rgba(255, 255, 255, 0.06);
       --switch-off: #3A4675;
       --scroll-thumb: rgba(79, 156, 255, 0.38);
       --red: #FF5C5C;
@@ -141,6 +147,9 @@
     --glow-blue-rgb: 79, 156, 255;
     --glow-orange-rgb: 255, 169, 77;
     --glow-green-rgb: 63, 208, 122;
+    --emblem-bg-1: #12233F;
+    --emblem-bg-2: #0B1A2E;
+    --emblem-ring: rgba(255, 255, 255, 0.06);
     --switch-off: #3A4675;
     --scroll-thumb: rgba(79, 156, 255, 0.38);
     --red: #FF5C5C;
@@ -215,7 +224,7 @@
     width: 124px;
     height: 124px;
     border-radius: 28px;
-    box-shadow: 0 26px 50px -20px rgba(var(--glow-blue-rgb), 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    box-shadow: 0 26px 50px -20px rgba(var(--glow-blue-rgb), 0.7), 0 0 0 1px var(--emblem-ring);
     animation: emblemFloat 4.2s ease-in-out 1.6s infinite alternate;
     overflow: visible;
   }
@@ -2115,13 +2124,14 @@
       <radialGradient id="sg-green" cx="36%" cy="28%" r="78%"><stop offset="0" stop-color="#9BDDB2"/><stop offset="0.32" stop-color="#3BB46A"/><stop offset="1" stop-color="#27934F"/></radialGradient>
       <radialGradient id="sg-orange" cx="36%" cy="28%" r="78%"><stop offset="0" stop-color="#F7C79C"/><stop offset="0.32" stop-color="#EC9A4B"/><stop offset="1" stop-color="#CF7829"/></radialGradient>
     </defs>
-    <rect width="512" height="512" rx="116" fill="#0B1A2E"/>
+    <linearGradient id="sg-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color: var(--emblem-bg-1)"/><stop offset="1" style="stop-color: var(--emblem-bg-2)"/></linearGradient>
+    <rect width="512" height="512" rx="116" fill="url(#sg-bg)"/>
     <g class="sph sph-green"><circle cx="170" cy="298" r="98" fill="url(#sg-green)" fill-opacity="0.9" stroke="#2A9A58" stroke-width="3"/></g>
     <g class="sph sph-orange"><circle cx="330" cy="298" r="98" fill="url(#sg-orange)" fill-opacity="0.9" stroke="#D4822F" stroke-width="3"/></g>
     <g class="sph sph-blue"><circle cx="256" cy="170" r="100" fill="url(#sg-blue)" fill-opacity="0.9" stroke="#1B5FC4" stroke-width="3"/></g>
   </svg>
   <h1>Intesa a <span>3</span></h1>
-  <p class="splash-tagline">Due danno gli indizi, il terzo indovina</p>
+  <p class="splash-tagline">Quanto vi capite davvero?</p>
   <div class="splash-action" id="splash-action">
     <div class="splash-bar"><div class="splash-bar-fill"></div></div>
     <button type="button" class="splash-start" id="splash-start" tabindex="-1"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg><span>Inizia</span></button>
@@ -5503,11 +5513,18 @@
       var em = document.querySelector('.splash-emblem'), act = document.getElementById('splash-action');
       if (!em || !act) return;
       var cr = container.getBoundingClientRect();
+      // ingombro reale del contenuto centrale (emblema, titolo, frase, pulsante), in larghezza
+      var contentL = 1e9, contentR = -1e9;
+      [em, document.querySelector('#splash-screen h1'), document.querySelector('.splash-tagline'), document.querySelector('.splash-bar'), document.querySelector('.splash-start')].forEach(function (el) {
+        if (!el) return;
+        var r = el.getBoundingClientRect();
+        contentL = Math.min(contentL, r.left - cr.left - 10);
+        contentR = Math.max(contentR, r.right - cr.left + 10);
+      });
       var bandTop = em.getBoundingClientRect().top - cr.top - 12, bandBottom = act.getBoundingClientRect().bottom - cr.top + 12, bandMid = (bandTop + bandBottom) / 2;
       placed.forEach(function (p) {
         var top = p.el.offsetTop, h = p.el.offsetHeight;
         var left = p.el.offsetLeft, w = p.el.offsetWidth;
-        var contentL = cw / 2 - 150, contentR = cw / 2 + 150;   // larghezza massima del contenuto centrale (titolo e frase)
         if (top + h > bandTop && top < bandBottom && left + w > contentL && left < contentR) {
           // schermo basso: la parola piccola o media che invaderebbe il centro viene nascosta (spostarla vicino alle altre farebbe ammassare);
           // altrimenti, e sempre per le parole grandi, viene spostata sopra o sotto il contenuto
