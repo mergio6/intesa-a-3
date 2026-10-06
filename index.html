@@ -5,7 +5,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Intesa a 3</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
@@ -1993,6 +1993,18 @@
     .sb-hint-icon svg { width: 22px; height: 22px; }
     .sb-hint-text { font-size: 16.5px; }
   }
+
+  /* ===== Comportamento "da app" (invece che da pagina web) =====
+     - niente "tira giù per ricaricare" e niente effetto rimbalzo ai bordi
+     - niente zoom con doppio tocco o pizzico
+     - il tocco non ritarda e non evidenzia nulla */
+  html, body {
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* le finestre che scorrono (regole, impostazioni, riepiloghi) non trasmettono lo scorrimento alla pagina */
+  .howto-body, .settings-card, .endgame-card, .results-card, .endgame-words { overscroll-behavior: contain; }
 </style>
 </head>
 <body>
