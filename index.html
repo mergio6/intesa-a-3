@@ -1113,7 +1113,7 @@
     cursor: pointer;
   }
   .settings-sync-btn:active { transform: scale(0.96); }
-  .settings-sync-status { font-size: 12px; font-weight: 700; color: var(--text-dim); line-height: 1.35; }
+  .settings-sync-status { font-size: 12px; font-weight: 700; color: var(--text-dim); line-height: 1.35; white-space: pre-line; }
   .settings-sync-status.ok { color: var(--chip-green); }
   .settings-sync-status.err { color: var(--chip-red); }
   .settings-theme-group {
@@ -3021,7 +3021,8 @@
       var t = sheetSyncStatus.lastSuccess;
       var hh = t ? ('0' + t.getHours()).slice(-2) : '--';
       var mm = t ? ('0' + t.getMinutes()).slice(-2) : '--';
-      el.textContent = 'Aggiornate alle ' + hh + ':' + mm + ' (' + facileBank.list.length + ' facili, ' + difficileBank.list.length + ' difficili, ' + doubleBank.list.length + ' raddoppi)';
+      // il numero di parole va a capo, sulla riga sotto l'orario
+      el.textContent = 'Aggiornate alle ' + hh + ':' + mm + '\n' + facileBank.list.length + ' facili, ' + difficileBank.list.length + ' difficili, ' + doubleBank.list.length + ' raddoppi';
       el.classList.add('ok');
     } else if (sheetSyncStatus.state === 'error') {
       el.textContent = 'Sincronizzazione non riuscita, uso le parole salvate sul dispositivo';
