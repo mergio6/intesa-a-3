@@ -5662,6 +5662,27 @@
   }
   setupSplashWords();
 
+  // ---------- schermo sempre acceso mentre l'app è aperta ----------
+  // Il telefono spegne lo schermo dopo un po' senza tocchi: qui si chiede di tenerlo acceso (Screen Wake Lock).
+  // Il sistema annulla la richiesta quando l'app va in secondo piano o lo schermo si spegne a mano, quindi si rinnova
+  // quando l'app torna visibile e a ogni tocco, se per qualche motivo (risparmio energetico, ecc.) non è attiva.
+  // Chiudendo l'app o passando a un'altra, lo schermo torna a spegnersi come da impostazioni del telefono.
+  var wakeLockSentinel = null, wakeLockPending = false;
+  function requestWakeLock() {
+    if (!('wakeLock' in navigator) || wakeLockSentinel || wakeLockPending) return;
+    if (document.visibilityState !== 'visible') return;
+    wakeLockPending = true;
+    navigator.wakeLock.request('screen').then(function (s) {
+      wakeLockPending = false;
+      wakeLockSentinel = s;
+      s.addEventListener('release', function () { if (wakeLockSentinel === s) wakeLockSentinel = null; });
+    }).catch(function () { wakeLockPending = false; /* non concesso adesso: si riprova al prossimo tocco */ });
+  }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') requestWakeLock(); });
+  window.addEventListener('pageshow', requestWakeLock);
+  ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) { document.addEventListener(ev, requestWakeLock, { passive: true }); });
+  requestWakeLock();
+
   // ---------- niente zoom con il pizzico (comportamento da app) ----------
   // Oltre allo stile e al viewport: se compaiono due dita insieme sullo schermo, il gesto di zoom viene annullato.
   // Un tocco singolo, un trascinamento o due tocchi brevi su due pulsanti non sono toccati.
